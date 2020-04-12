@@ -1,0 +1,15 @@
+{
+    "extends": [
+        "plugin:react/recommended",
+        "simon/lib/node"
+    ],
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "rules": {
+        "no-unused-vars": "off",
+        "no-console": "warn",
+        "indent": "off"
+    }
+}
