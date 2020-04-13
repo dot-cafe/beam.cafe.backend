@@ -1,15 +1,19 @@
 {
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json",
+        "sourceType": "module",
+        "ecmaVersion": 2018
+    },
     "extends": [
-        "plugin:react/recommended",
+        "eslint:recommended",
         "simon/lib/node"
+    ],
+    "plugins": [
+        "@typescript-eslint"
     ],
     "env": {
         "browser": true,
         "es6": true
-    },
-    "rules": {
-        "no-unused-vars": "off",
-        "no-console": "warn",
-        "indent": "off"
     }
 }
