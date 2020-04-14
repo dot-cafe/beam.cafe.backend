@@ -1,20 +1,15 @@
-import * as WebSocket from 'ws';
-import {uid}          from '../utils/uid';
-import {clients}      from './index';
-
-export type HostedFile = {
-    name: string;
-    size: number;
-    key: string;
-};
-
-export type Client = {
-    socket: WebSocket;
-    files: Array<HostedFile>;
-};
+import * as WebSocket       from 'ws';
+import {clients, downloads} from '../state';
+import {Client}             from '../types';
+import {removeItem}         from '../utils/array';
+import {uid}                from '../utils/uid';
 
 /* eslint-disable no-console */
+let clientCounter = 0;
 export const acceptClient = (ws: WebSocket): void => {
+    clientCounter++;
+
+    console.log(`[WS] New client; Connected: ${clientCounter}`);
     const client: Client = {
         socket: ws,
         files: []
@@ -63,13 +58,25 @@ export const acceptClient = (ws: WebSocket): void => {
                     console.warn(`[WS] Unknown action: ${type}`);
                 }
             }
-
         } catch (e) {
         }
     });
 
     ws.on('close', () => {
-        const index = clients.indexOf(client);
-        clients.splice(index, 1);
+        clientCounter--;
+
+        // Cancel all downloads
+        const pendingDownloads = downloads.filter(value => value.fileProvider === client);
+        for (const download of pendingDownloads) {
+            download.downloaderResponse.status(410);
+            download.downloaderResponse.send();
+            download.uploaderResponse?.status(410);
+            download.uploaderResponse?.send();
+            removeItem(downloads, download);
+        }
+
+        // Remove client
+        removeItem(clients, client);
+        console.log(`[WS] Client lost: Downloads cleaned up: ${pendingDownloads.length}; Connected: ${clientCounter}`);
     });
 };
