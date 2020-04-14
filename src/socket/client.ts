@@ -5,7 +5,7 @@ import {clients}      from './index';
 export type HostedFile = {
     name: string;
     size: number;
-    keys: Array<string>;
+    key: string;
 };
 
 export type Client = {
@@ -34,7 +34,7 @@ export const acceptClient = (ws: WebSocket): void => {
             const ids = [];
 
             switch (type) {
-                case 'req-download-keys': {
+                case 'download-keys': {
 
                     // Register files
                     for (const file of payload) {
@@ -46,7 +46,7 @@ export const acceptClient = (ws: WebSocket): void => {
                         });
 
                         client.files.push({
-                            keys: [fileId],
+                            key: fileId,
                             name: file.name,
                             size: file.size
                         });
@@ -54,7 +54,7 @@ export const acceptClient = (ws: WebSocket): void => {
 
                     // Reply with unique ids
                     ws.send(JSON.stringify({
-                        type: 'res-download-keys',
+                        type: 'download-keys',
                         payload: ids
                     }));
                     break;
