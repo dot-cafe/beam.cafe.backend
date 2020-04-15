@@ -1,8 +1,8 @@
-import * as WebSocket       from 'ws';
-import {clients, downloads} from '../state';
-import {Client}             from '../types';
-import {removeItem}         from '../utils/array';
-import {uid}                from '../utils/uid';
+import * as WebSocket           from 'ws';
+import {clients, downloads}     from '../state';
+import {Client, DownloadStatus} from '../types';
+import {removeItem}             from '../utils/array';
+import {uid}                    from '../utils/uid';
 
 /* eslint-disable no-console */
 let clientCounter = 0;
@@ -26,10 +26,10 @@ export const acceptClient = (ws: WebSocket): void => {
         // Try to parse message
         try {
             const {type, payload} = JSON.parse(message);
-            const ids = [];
 
             switch (type) {
                 case 'download-keys': {
+                    const ids = [];
 
                     // Register files
                     for (const file of payload) {
@@ -52,6 +52,20 @@ export const acceptClient = (ws: WebSocket): void => {
                         type: 'download-keys',
                         payload: ids
                     }));
+                    break;
+                }
+                case 'cancel-request': {
+                    const download = downloads.find(v => v.downloadId === payload);
+                    console.log(download && download.status);
+
+                    if (download &&
+                        download.status === DownloadStatus.Pending ||
+                        download.status === DownloadStatus.Active) {
+                        download.status = DownloadStatus.Cancelled;
+                        download.dRes.status(424); // Failed Dependency
+                        download.dRes.send();
+                    }
+
                     break;
                 }
                 default: {

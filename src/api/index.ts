@@ -12,57 +12,58 @@ export const api = (): Router => {
 
         // Validate id
         if (typeof downloadId === 'string') {
-            const request = downloads.find(v => v.downloadId === downloadId);
+            const download = downloads.find(v => v.downloadId === downloadId);
 
-            if (request) {
+            if (download) {
 
                 // Pipe file
-                if (!request.headersSent) {
-                    request.headersSent = true;
-                    request.status = DownloadStatus.ACTIVE;
-                    request.dRes.set('Content-Length', String(request.file.size));
-                    request.dRes.attachment(request.file.name);
+                if (!download.headersSent) {
+                    download.headersSent = true;
+                    download.status = DownloadStatus.Active;
+                    download.dRes.set('Content-Length', String(download.file.size));
+                    download.dRes.attachment(download.file.name);
                 }
 
-                request.uReq = req;
-                request.uRes = res;
+                download.uReq = req;
+                download.uRes = res;
 
                 req.on('data', chunk => {
-                    request.dRes.write(chunk);
-                    request.bytesTransferred += chunk.length;
+                    download.dRes.write(chunk);
+                    download.bytesTransferred += chunk.length;
                 });
 
                 req.on('error', () => {
-                    console.log('error');
 
                     // An error occured somewhere between both clients
-                    request.dRes.status(500);
-                    request.dRes.send();
-                    request.status = DownloadStatus.ERRORED;
+                    download.dRes.status(500);
+                    download.dRes.send();
+                    download.status = DownloadStatus.Errored;
                     res.sendStatus(500);
 
                     // Clean up
-                    removeItem(downloads, request);
+                    removeItem(downloads, download);
                 });
 
                 req.on('end', () => {
 
                     // Finish requests
-                    request.dRes.status(200);
-                    request.dRes.send();
-                    request.status = DownloadStatus.FINISHED;
+                    download.dRes.status(200);
+                    download.dRes.send();
+                    download.status = DownloadStatus.Finished;
                     res.sendStatus(200);
 
                     // Clean up
-                    removeItem(downloads, request);
+                    removeItem(downloads, download);
                 });
 
                 // Dectect if the downloader closes the connection
-                request.dRes.on('close', () => {
-                    if (request.status !== DownloadStatus.FINISHED) {
-                        request.fileProvider.socket.send(JSON.stringify({
+                download.dRes.on('close', () => {
+                    if (download.status !== DownloadStatus.Finished &&
+                        download.status !== DownloadStatus.Cancelled) {
+                        download.status = DownloadStatus.PeerReset;
+                        download.fileProvider.socket.send(JSON.stringify({
                             type: 'download-cancelled',
-                            payload: request.downloadId
+                            payload: download.downloadId
                         }));
                     }
                 });
@@ -96,9 +97,9 @@ export const api = (): Router => {
                 const downloadId = uid();
 
                 // Put request on hold
-                downloads.push({
+                const download = {
                     downloadId,
-                    status: DownloadStatus.PENDING,
+                    status: DownloadStatus.Pending,
                     bytesTransferred: 0,
                     fileProvider: provider,
                     uRes: null,
@@ -106,7 +107,9 @@ export const api = (): Router => {
                     file: hostedFile,
                     dRes: res,
                     headersSent: false
-                });
+                };
+
+                downloads.push(download);
 
                 // Request file
                 provider.socket.send(JSON.stringify({

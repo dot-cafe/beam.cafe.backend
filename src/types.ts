@@ -27,11 +27,12 @@ export type Client = {
  * Status of a download
  */
 export enum DownloadStatus {
-    PENDING,
-    ACTIVE,
-    FINISHED,
-    ERRORED,
-    ABORTED
+    Pending = 'Pending',
+    Active = 'Active',
+    Finished = 'Finished',
+    Errored = 'Errored',
+    Cancelled = 'Cancelled',
+    PeerReset = 'PeerReset',
 }
 
 /**
