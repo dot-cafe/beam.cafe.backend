@@ -1,4 +1,4 @@
-import {Client, PendingDownload} from '../types';
+import {Client, Download} from '../types';
 
 export const clients: Array<Client> = [];
-export const downloads: Array<PendingDownload> = [];
+export const downloads: Array<Download> = [];

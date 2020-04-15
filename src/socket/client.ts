@@ -68,10 +68,10 @@ export const acceptClient = (ws: WebSocket): void => {
         // Cancel all downloads
         const pendingDownloads = downloads.filter(value => value.fileProvider === client);
         for (const download of pendingDownloads) {
-            download.downloaderResponse.status(410);
-            download.downloaderResponse.send();
-            download.uploaderResponse?.status(410);
-            download.uploaderResponse?.send();
+            download.dRes.status(410);
+            download.dRes.send();
+            download.uRes?.status(410);
+            download.uRes?.send();
             removeItem(downloads, download);
         }
 

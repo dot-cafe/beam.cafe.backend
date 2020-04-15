@@ -1,8 +1,8 @@
-import {Router}             from 'express';
-import {clients, downloads} from '../state';
-import {Client, HostedFile} from '../types';
-import {removeItem}         from '../utils/array';
-import {uid}                from '../utils/uid';
+import {Router}                             from 'express';
+import {clients, downloads}                 from '../state';
+import {Client, DownloadStatus, HostedFile} from '../types';
+import {removeItem}                         from '../utils/array';
+import {uid}                                from '../utils/uid';
 
 export const api = (): Router => {
     const router = Router();
@@ -19,37 +19,52 @@ export const api = (): Router => {
                 // Pipe file
                 if (!request.headersSent) {
                     request.headersSent = true;
-                    request.downloaderResponse.set('Content-Length', String(request.file.size));
-                    request.downloaderResponse.attachment(request.file.name);
+                    request.status = DownloadStatus.ACTIVE;
+                    request.dRes.set('Content-Length', String(request.file.size));
+                    request.dRes.attachment(request.file.name);
                 }
 
-                request.uploaderRequest = req;
-                request.uploaderResponse = res;
-                req.addListener('data', chunk => {
-                    request.downloaderResponse.write(chunk);
+                request.uReq = req;
+                request.uRes = res;
+
+                req.on('data', chunk => {
+                    request.dRes.write(chunk);
                     request.bytesTransferred += chunk.length;
                 });
 
-                req.addListener('error', () => {
+                req.on('error', () => {
+                    console.log('error');
 
                     // An error occured somewhere between both clients
-                    request.downloaderResponse.status(500);
-                    request.downloaderResponse.send();
+                    request.dRes.status(500);
+                    request.dRes.send();
+                    request.status = DownloadStatus.ERRORED;
                     res.sendStatus(500);
 
                     // Clean up
                     removeItem(downloads, request);
                 });
 
-                req.addListener('end', () => {
+                req.on('end', () => {
 
                     // Finish requests
-                    request.downloaderResponse.status(200);
-                    request.downloaderResponse.send();
+                    request.dRes.status(200);
+                    request.dRes.send();
+                    request.status = DownloadStatus.FINISHED;
                     res.sendStatus(200);
 
                     // Clean up
                     removeItem(downloads, request);
+                });
+
+                // Dectect if the downloader closes the connection
+                request.dRes.on('close', () => {
+                    if (request.status !== DownloadStatus.FINISHED) {
+                        request.fileProvider.socket.send(JSON.stringify({
+                            type: 'download-cancelled',
+                            payload: request.downloadId
+                        }));
+                    }
                 });
 
                 return;
@@ -82,14 +97,15 @@ export const api = (): Router => {
 
                 // Put request on hold
                 downloads.push({
-                    bytesTransferred: 0,
-                    headersSent: false,
-                    file: hostedFile,
-                    downloaderResponse: res,
-                    uploaderResponse: null,
-                    uploaderRequest: null,
                     downloadId,
-                    fileProvider: provider
+                    status: DownloadStatus.PENDING,
+                    bytesTransferred: 0,
+                    fileProvider: provider,
+                    uRes: null,
+                    uReq: null,
+                    file: hostedFile,
+                    dRes: res,
+                    headersSent: false
                 });
 
                 // Request file

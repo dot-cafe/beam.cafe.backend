@@ -24,10 +24,24 @@ export type Client = {
 };
 
 /**
+ * Status of a download
+ */
+export enum DownloadStatus {
+    PENDING,
+    ACTIVE,
+    FINISHED,
+    ERRORED,
+    ABORTED
+}
+
+/**
  * A currently pending download.
  */
-export type PendingDownload = {
+export type Download = {
     downloadId: string;
+
+    // Download status
+    status: DownloadStatus;
 
     // Amount of bytes transferred
     bytesTransferred: number;
@@ -36,11 +50,11 @@ export type PendingDownload = {
     fileProvider: Client;
 
     // The uploader's request and response
-    uploaderResponse: Response | null;
-    uploaderRequest: Request | null;
+    uRes: Response | null;
+    uReq: Request | null;
 
     // The downloader's response
-    downloaderResponse: Response;
+    dRes: Response;
 
     // The file
     file: HostedFile;
