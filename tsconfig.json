@@ -6,6 +6,7 @@
         "noImplicitAny": false,
         "module": "commonjs",
         "target": "es6",
+        "strict": true,
         "outDir": "dist"
     },
     "include": [
