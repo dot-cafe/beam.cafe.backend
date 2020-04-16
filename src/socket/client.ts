@@ -1,8 +1,16 @@
-import * as WebSocket           from 'ws';
-import {clients, downloads}     from '../state';
-import {Client, DownloadStatus} from '../types';
-import {removeItem}             from '../utils/array';
-import {uid}                    from '../utils/uid';
+import * as WebSocket                     from 'ws';
+import {clients, downloads}               from '../state';
+import {Client, Download, DownloadStatus} from '../types';
+import {removeItem}                       from '../utils/array';
+import {uid}                              from '../utils/uid';
+
+function cancelDownload(download: Download): void {
+    download.dRes.status(410);
+    download.dRes.send();
+    download.uRes?.status(410);
+    download.uRes?.send();
+    removeItem(downloads, download);
+}
 
 /* eslint-disable no-console */
 let clientCounter = 0;
@@ -33,15 +41,18 @@ export const acceptClient = (ws: WebSocket): void => {
 
                     // Register files
                     for (const file of payload) {
-                        const fileId = uid();
+                        const key = uid();
+                        const id = uid();
 
                         ids.push({
                             name: file.name,
-                            key: fileId
+                            key,
+                            id
                         });
 
                         client.files.push({
-                            key: fileId,
+                            id,
+                            key,
                             name: file.name,
                             size: file.size
                         });
@@ -55,8 +66,7 @@ export const acceptClient = (ws: WebSocket): void => {
                     break;
                 }
                 case 'cancel-request': {
-                    const download = downloads.find(v => v.downloadId === payload);
-                    console.log(download && download.status);
+                    const download = downloads.find(v => v.id === payload);
 
                     if (download &&
                         download.status === DownloadStatus.Pending ||
@@ -64,6 +74,21 @@ export const acceptClient = (ws: WebSocket): void => {
                         download.status = DownloadStatus.Cancelled;
                         download.dRes.status(424); // Failed Dependency
                         download.dRes.send();
+                    }
+
+                    break;
+                }
+                case 'remove-file': {
+                    const file = client.files.find(value => value.id === payload);
+
+                    if (file) {
+
+                        // Cancel downloads associated with it
+                        for (const download of downloads) {
+                            if (download.file.id === payload) {
+                                cancelDownload(download);
+                            }
+                        }
                     }
 
                     break;
@@ -82,11 +107,7 @@ export const acceptClient = (ws: WebSocket): void => {
         // Cancel all downloads
         const pendingDownloads = downloads.filter(value => value.fileProvider === client);
         for (const download of pendingDownloads) {
-            download.dRes.status(410);
-            download.dRes.send();
-            download.uRes?.status(410);
-            download.uRes?.send();
-            removeItem(downloads, download);
+            cancelDownload(download);
         }
 
         // Remove client

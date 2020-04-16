@@ -6,6 +6,7 @@ import * as WebSocket      from 'ws';
  * and the download-key.
  */
 export type HostedFile = {
+    id: string;
     name: string;
     size: number;
     key: string;
@@ -39,7 +40,7 @@ export enum DownloadStatus {
  * A currently pending download.
  */
 export type Download = {
-    downloadId: string;
+    id: string;
 
     // Download status
     status: DownloadStatus;

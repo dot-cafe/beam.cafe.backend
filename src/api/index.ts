@@ -7,12 +7,12 @@ import {uid}                                from '../utils/uid';
 export const api = (): Router => {
     const router = Router();
 
-    router.post('/share/:downloadId', (req, res) => {
-        const {downloadId} = req.params;
+    router.post('/share/:id', (req, res) => {
+        const {id} = req.params;
 
         // Validate id
-        if (typeof downloadId === 'string') {
-            const download = downloads.find(v => v.downloadId === downloadId);
+        if (typeof id === 'string') {
+            const download = downloads.find(v => v.id === id);
 
             if (download) {
 
@@ -63,7 +63,7 @@ export const api = (): Router => {
                         download.status = DownloadStatus.PeerReset;
                         download.fileProvider.socket.send(JSON.stringify({
                             type: 'download-cancelled',
-                            payload: download.downloadId
+                            payload: download.id
                         }));
                     }
                 });
@@ -94,11 +94,11 @@ export const api = (): Router => {
 
             // Validate provider
             if (provider && hostedFile) {
-                const downloadId = uid();
+                const id = uid();
 
                 // Put request on hold
                 const download = {
-                    downloadId,
+                    id,
                     status: DownloadStatus.Pending,
                     bytesTransferred: 0,
                     fileProvider: provider,
@@ -116,7 +116,7 @@ export const api = (): Router => {
                     type: 'file-request',
                     payload: {
                         fileKey,
-                        downloadId
+                        id
                     }
                 }));
                 return;
