@@ -7,6 +7,7 @@
     "keywords": [],
     "main": "src/app.ts",
     "scripts": {
+        "build": "tsc",
         "start": "tsc && node dist/app.js",
         "dev": "ts-node-dev --respawn --transpileOnly src/app.ts",
         "lint": "eslint src/**/*.{js,ts}",
