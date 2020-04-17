@@ -10,7 +10,11 @@ import {wrapHTTPServer} from './socket';
 
     // Disable powered-by-message
     app.disable('x-powered-by');
-    app.use(cors());
+
+    // Enable cors during development
+    if (process.env.NODE_ENV === 'development') {
+        app.use(cors());
+    }
 
     // Register api
     app.use('/', api());
