@@ -5,7 +5,7 @@ import {Download} from '../classes/Download';
 export const api = (): Router => {
     const router = Router();
 
-    router.post('/share/:id', (req, res) => {
+    router.post('/file/:id', (req, res) => {
 
         // Validate id
         if (Download.acceptUpload(req, res, req.params.id)) {
@@ -15,7 +15,7 @@ export const api = (): Router => {
         res.sendStatus(400);
     });
 
-    router.get('/shared/:id', (req, res) => {
+    router.get('/file/:id', (req, res) => {
         const resolved = Client.resolveFile(req.params.id);
 
         // Validate provider
