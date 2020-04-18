@@ -1,8 +1,9 @@
-import * as WebSocket from 'ws';
-import {HostedFile}   from '../types';
-import {removeItem}   from '../utils/array';
-import {uid}          from '../utils/uid';
-import {Download}     from './Download';
+import * as WebSocket  from 'ws';
+import {log, LogLevel} from '../logging';
+import {HostedFile}    from '../types';
+import {removeItem}    from '../utils/array';
+import {uid}           from '../utils/uid';
+import {Download}      from './Download';
 
 type Message = {
     type: string;
@@ -23,7 +24,7 @@ export class Client {
         this.socket = socket;
         this.files = [];
         Client.clients.push(this);
-        console.log(`[CLIENT] New client; Connected: ${Client.clients.length}`);
+        log(`New client (connected: ${Client.clients.length})`);
     }
 
     public static remove(download: Client): void {
@@ -52,7 +53,7 @@ export class Client {
 
         // Remove client
         Client.remove(this);
-        console.log(`[CLIENT] Client lost: Downloads cleaned up: ${pendingDownloads.length}; Connected: ${Client.clients.length}`);
+        log(`Client removed (remaining: ${Client.clients.length}, downloads cancelled: ${pendingDownloads.length})`);
     }
 
     public acceptFiles(incomingFiles: Array<IncomingFiles>): void {
@@ -68,7 +69,7 @@ export class Client {
                     size: file.size
                 });
             } else {
-                console.warn('[CLIENT] Invalid item as incoming-file: ', file);
+                log('Invalid incoming-file', LogLevel.ERROR);
             }
         }
 
@@ -96,13 +97,13 @@ export class Client {
                 }
             });
         } else {
-            console.warn('[CLIENT] Requested file does not exist any longer.');
+            log('Requested file does not exist any longer', LogLevel.INFO);
         }
     }
 
     public removeFile(id: string | unknown): void {
         if (typeof id !== 'string') {
-            console.warn('[CLIENT] Cannot remove file: Invalid payload.');
+            log(`Cannot remove file, invalid payload of type: ${typeof id}`, LogLevel.ERROR);
             return;
         }
 
@@ -118,9 +119,9 @@ export class Client {
                 }
             }
 
-            console.log(`[CLIENT] File removed, ${removed} download(s) cancelled.`);
+            log(`File removed, ${removed} downloads cancelled`);
         } else {
-            console.warn('[CLIENT] Cannot remove file: File does not exist.');
+            log('Cannot remove file because it does not exist', LogLevel.WARNING);
         }
     }
 

@@ -1,6 +1,7 @@
-import * as WebSocket from 'ws';
-import {Client}       from '../classes/Client';
-import {Download}     from '../classes/Download';
+import * as WebSocket  from 'ws';
+import {Client}        from '../classes/Client';
+import {Download}      from '../classes/Download';
+import {log, LogLevel} from '../logging';
 
 /* eslint-disable no-console */
 export const acceptClient = (ws: WebSocket): void => {
@@ -31,10 +32,11 @@ export const acceptClient = (ws: WebSocket): void => {
                     break;
                 }
                 default: {
-                    console.warn(`[WS] Unknown action: ${type}`);
+                    log(`Unknown ws-request: ${type}`, LogLevel.WARNING);
                 }
             }
         } catch (e) {
+            log(`Failed to parse websocket request: ${e.message}`, LogLevel.ERROR);
         }
     });
 

@@ -1,9 +1,9 @@
 import {Request, Response} from 'express';
+import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
 import {removeItem}        from '../utils/array';
 import {uid}               from '../utils/uid';
 import {Client}            from './Client';
-
 
 /**
  * Status of a download
@@ -16,7 +16,6 @@ export enum DownloadStatus {
     Cancelled = 'Cancelled',
     PeerReset = 'PeerReset',
 }
-
 
 export class Download {
     public static downloads: Array<Download> = [];
@@ -60,6 +59,7 @@ export class Download {
         // Initiate transfer
         fileProvider.requestFile(file.id, this.id);
         Download.downloads.push(this);
+        log(`Download started, id: ${this.id}`);
     }
 
     public static byId(id: string): Download | null {
@@ -78,9 +78,10 @@ export class Download {
         const download = Download.byId(downloadId);
 
         if (!download) {
+            log(`Invalid download ID: ${downloadId}`, LogLevel.VERBOSE);
             return false;
         } else if (download.status !== DownloadStatus.Pending) {
-            console.error('[DOWNLOAD] Upload is already active!');
+            log('Upload is already active', LogLevel.ERROR);
             return false;
         }
 
@@ -99,6 +100,7 @@ export class Download {
             return true;
         }
 
+        log(`Cannot find download to cancel, id: ${downloadId}`, LogLevel.ERROR);
         return false;
     }
 
