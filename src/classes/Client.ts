@@ -24,7 +24,7 @@ export class Client {
         this.socket = socket;
         this.files = [];
         Client.clients.push(this);
-        log(`New client (connected: ${Client.clients.length})`);
+        log(`New client; Connected: ${Client.clients.length})`);
     }
 
     public static remove(download: Client): void {
@@ -53,7 +53,7 @@ export class Client {
 
         // Remove client
         Client.remove(this);
-        log(`Client removed (remaining: ${Client.clients.length}, downloads cancelled: ${pendingDownloads.length})`);
+        log(`Client disconnected; Remaining: ${Client.clients.length}; Downloads cancelled: ${pendingDownloads.length}`);
     }
 
     public acceptFiles(incomingFiles: Array<IncomingFiles>): void {
@@ -103,7 +103,7 @@ export class Client {
 
     public removeFile(id: string | unknown): void {
         if (typeof id !== 'string') {
-            log(`Cannot remove file, invalid payload of type: ${typeof id}`, LogLevel.ERROR);
+            log(`Cannot remove file: invalid payload of type: ${typeof id}`, LogLevel.ERROR);
             return;
         }
 
@@ -119,7 +119,7 @@ export class Client {
                 }
             }
 
-            log(`File removed, ${removed} downloads cancelled`);
+            log(`File removed; ${removed} downloads cancelled`);
         } else {
             log('Cannot remove file because it does not exist', LogLevel.WARNING);
         }

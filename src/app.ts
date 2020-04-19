@@ -26,7 +26,7 @@ import {wrapHTTPServer} from './socket';
 
     wrapHTTPServer(server);
     server.on('request', app);
-    log('Websocket server attached...');
+    log('WebSocket server attached...');
 
     server.listen(8080);
     log('App successfully launched');

@@ -59,7 +59,7 @@ export class Download {
         // Initiate transfer
         fileProvider.requestFile(file.id, this.id);
         Download.downloads.push(this);
-        log(`Download started, id: ${this.id}`);
+        log(`Download started; ID: ${this.id}`);
     }
 
     public static byId(id: string): Download | null {
@@ -78,7 +78,7 @@ export class Download {
         const download = Download.byId(downloadId);
 
         if (!download) {
-            log(`Invalid download ID: ${downloadId}`, LogLevel.VERBOSE);
+            log(`Invalid download; ID: ${downloadId}`, LogLevel.VERBOSE);
             return false;
         } else if (download.status !== DownloadStatus.Pending) {
             log('Upload is already active', LogLevel.ERROR);
@@ -100,7 +100,7 @@ export class Download {
             return true;
         }
 
-        log(`Cannot find download to cancel, id: ${downloadId}`, LogLevel.ERROR);
+        log(`Cannot find download to cancel; ID: ${downloadId}`, LogLevel.ERROR);
         return false;
     }
 
