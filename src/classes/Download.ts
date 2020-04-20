@@ -157,8 +157,13 @@ export class Download {
 
         uploaderRequest.on('close', () => {
 
-            // Peer paused the upload
-            this.status = DownloadStatus.Pending;
+            // Upload is either cancelled or "paused"
+            if (
+                this.status !== DownloadStatus.Cancelled &&
+                this.bytesTransferred < this.file.size
+            ) {
+                this.status = DownloadStatus.Pending;
+            }
         });
 
         uploaderRequest.on('end', () => {
