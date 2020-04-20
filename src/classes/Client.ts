@@ -24,7 +24,7 @@ export class Client {
         this.socket = socket;
         this.files = [];
         Client.clients.push(this);
-        log(`New client; Connected: ${Client.clients.length})`);
+        log(`New client; Connected: ${Client.clients.length}`);
     }
 
     public static remove(download: Client): void {

@@ -100,7 +100,7 @@ export class Download {
             return true;
         }
 
-        log(`Cannot find download to cancel; ID: ${downloadId}`, LogLevel.ERROR);
+        log(`Cannot find download to cancel; ID: ${downloadId}`, LogLevel.VERBOSE);
         return false;
     }
 
@@ -110,15 +110,17 @@ export class Download {
 
     public remove(): void {
         Download.remove(this);
+        log(`Download removed; Remaining: ${Download.downloads.length}`, LogLevel.SILLY);
     }
 
     public cancel(): void {
         this.status = DownloadStatus.Cancelled;
 
-        /**
-         * Unfortunately there's no way to cancel a response.
-         * The client / uploader is responsible for cancelling their upload!
-         */
+        // This raises a network-error on the client, end would lead to an incomplete file.
+        this.downloaderResponse.destroy();
+        log('Download cancelled.', LogLevel.SILLY);
+
+        this.remove();
     }
 
     public accept(
@@ -126,12 +128,18 @@ export class Download {
         uploaderResponse: Response
     ): void {
         const {downloaderResponse} = this;
+        this.status = DownloadStatus.Active;
 
-        // Pipe file
         if (!this.headersSent) {
-            this.headersSent = true;
-            this.status = DownloadStatus.Active;
+
+            /**
+             * Everything gets transferred within one single chunk.
+             * This way we can easily abort the reponse which is not possible with a
+             * "non-streaming" connection.
+             */
             downloaderResponse.set('Content-Length', String(this.file.size));
+            downloaderResponse.set('Content-Type', 'application/octet-stream');
+            downloaderResponse.set('Transfer-Encoding', 'chunked');
             downloaderResponse.attachment(this.file.name);
         }
 
@@ -152,7 +160,7 @@ export class Download {
             this.done = true;
 
             // Clean up
-            Download.remove(this);
+            this.remove();
         });
 
         uploaderRequest.on('close', () => {
@@ -175,7 +183,7 @@ export class Download {
             this.done = true;
 
             // Clean up
-            Download.remove(this);
+            this.remove();
         });
 
         // Dectect if the downloader closes the connection
@@ -190,6 +198,9 @@ export class Download {
                     type: 'download-cancelled',
                     payload: this.id
                 }));
+
+                // Cleanup
+                this.remove();
             }
         });
     }
