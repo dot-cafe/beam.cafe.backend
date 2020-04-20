@@ -141,6 +141,7 @@ export class Download {
             downloaderResponse.set('Content-Type', 'application/octet-stream');
             downloaderResponse.set('Transfer-Encoding', 'chunked');
             downloaderResponse.attachment(this.file.name);
+            this.headersSent = true;
         }
 
         this.uploaderRequest = uploaderRequest;
