@@ -115,12 +115,10 @@ export class Download {
     public cancel(): void {
         this.status = DownloadStatus.Cancelled;
 
-        if (!this.done) {
-            this.downloaderResponse.status(410);
-            this.downloaderResponse.send('Cancelled by peer.');
-        }
-
-        // The client / uploader is responsible for cancelling their upload!
+        /**
+         * Unfortunately there's no way to cancel a response.
+         * The client / uploader is responsible for cancelling their upload!
+         */
     }
 
     public accept(
@@ -146,28 +144,30 @@ export class Download {
         });
 
         uploaderRequest.on('error', () => {
+            downloaderResponse.end();
 
             // An error occured somewhere between both clients
-            downloaderResponse.status(500);
-            downloaderResponse.send();
-            this.status = DownloadStatus.Errored;
-
-            this.done = true;
             uploaderResponse.sendStatus(500);
+            this.status = DownloadStatus.Errored;
+            this.done = true;
 
             // Clean up
             Download.remove(this);
         });
 
+        uploaderRequest.on('close', () => {
+
+            // Peer paused the upload
+            this.status = DownloadStatus.Pending;
+        });
+
         uploaderRequest.on('end', () => {
+            downloaderResponse.end();
 
             // Finish requests
-            this.status = DownloadStatus.Finished;
-            downloaderResponse.status(200);
-            downloaderResponse.send();
-
-            this.done = true;
             uploaderResponse.sendStatus(200);
+            this.status = DownloadStatus.Finished;
+            this.done = true;
 
             // Clean up
             Download.remove(this);
