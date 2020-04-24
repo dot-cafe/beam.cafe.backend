@@ -1,6 +1,9 @@
-import {Router}   from 'express';
-import {Client}   from '../classes/Client';
-import {Download} from '../classes/Download';
+import {Router}            from 'express';
+import {Client}            from '../classes/Client';
+import {Download}          from '../classes/Download';
+import {TEMPLATE_DOWNLOAD} from '../constants';
+import {minifyHtml}        from '../utils/minify-html';
+import ejs                 from 'ejs';
 
 export const api = (): Router => {
     const router = Router();
@@ -25,6 +28,20 @@ export const api = (): Router => {
         }
 
         res.sendStatus(400);
+    });
+
+    router.get('/d/:id', (req, res) => {
+        const resolved = Client.resolveFile(req.params.id);
+
+        ejs.renderFile(TEMPLATE_DOWNLOAD, {
+            file: resolved ? resolved[1] : null
+        }, {cache: true}, (err, str) => {
+            if (err) {
+                res.sendStatus(500);
+            } else {
+                res.send(minifyHtml(str));
+            }
+        });
     });
 
     return router;
