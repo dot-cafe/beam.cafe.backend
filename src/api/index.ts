@@ -3,6 +3,7 @@ import {Client}            from '../classes/Client';
 import {Download}          from '../classes/Download';
 import {TEMPLATE_DOWNLOAD} from '../constants';
 import {minifyHtml}        from '../utils/minify-html';
+import prettyBytes         from 'pretty-bytes';
 import ejs                 from 'ejs';
 
 export const api = (): Router => {
@@ -34,6 +35,7 @@ export const api = (): Router => {
         const resolved = Client.resolveFile(req.params.id);
 
         ejs.renderFile(TEMPLATE_DOWNLOAD, {
+            prettyBytes,
             file: resolved ? resolved[1] : null
         }, {cache: true}, (err, str) => {
             if (err) {

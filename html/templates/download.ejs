@@ -9,7 +9,7 @@
     <%
     title = file ? `Download ${file.name}` : 'File not found';
     seoTitle = file ? 'Something got beamed up for you!' : 'Whoops, nothing to see here.';
-    seoDescription = file ? `Click this link to download "${file.name}"` : 'Contact your peer if you believe this is a mistake.';
+    seoDescription = file ? `Click this link to download "${file.name}" (${prettyBytes(file.size)})` : 'Contact your peer if you believe this is a mistake.';
     %>
 
     <!-- Theme color -->
@@ -43,7 +43,7 @@
 
 <% if(file) { %>
     <main>
-        <h3><%= file.name %></h3>
+        <h3><%= file.name %> (<%= prettyBytes(file.size) %>)</h3>
         <a href="/file/<%= file.id %>" target="_blank">Download File</a>
     </main>
 <% } else { %>
