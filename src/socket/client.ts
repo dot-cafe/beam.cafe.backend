@@ -23,16 +23,19 @@ export const acceptClient = (ws: WebSocket): void => {
                     const oldClient = Client.restoreSession(payload, ws);
 
                     if (oldClient) {
-                        client.remove();// TODO: This is ugly
+
+                        // Remove current client and use new one
+                        client.remove();
                         client = oldClient;
+                    } else {
+
+                        // Create a fresh sessions, this will clear all states client-side
+                        client.createSession();
                     }
 
-                    // TODO: What now?
                     break;
                 }
                 case 'create-session': {
-
-                    // TODO: What if this fails
                     client.createSession();
                     break;
                 }
