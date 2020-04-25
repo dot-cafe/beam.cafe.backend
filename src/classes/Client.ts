@@ -17,6 +17,7 @@ type IncomingFiles = {
 
 export class Client {
     public static readonly CONNECTION_TIMEOUT = 1000 * 60 * 15; // 15 Minutes
+    public static readonly SESSION_KEY_SIZE = 64;
     public static readonly clients: Array<Client> = [];
     public readonly files: Array<HostedFile>;
     public socket: WebSocket;
@@ -88,7 +89,7 @@ export class Client {
 
     public createSession(): boolean {
         if (this.sessionKey === null) {
-            this.sessionKey = uid(); // TODO: Use stronger UID
+            this.sessionKey = uid(Client.SESSION_KEY_SIZE);
 
             this.sendJSON({
                 type: 'new-session',
@@ -113,7 +114,7 @@ export class Client {
 
             // Reset timeout and create new session-key
             this.connectionTimeout = null;
-            this.sessionKey = uid();
+            this.sessionKey = uid(Client.SESSION_KEY_SIZE);
 
             this.sendJSON({
                 type: 'restore-session',
