@@ -7,7 +7,7 @@ import {Download}      from './Download';
 
 type Message = {
     type: string;
-    payload: object;
+    payload: unknown;
 }
 
 type IncomingFiles = {
@@ -16,13 +16,21 @@ type IncomingFiles = {
 }
 
 export class Client {
+    public static readonly CONNECTION_TIMEOUT = 1000 * 60 * 15; // 15 Minutes
     public static readonly clients: Array<Client> = [];
-    public readonly socket: WebSocket;
     public readonly files: Array<HostedFile>;
+    public socket: WebSocket;
+    public sessionKey: string | null;
+
+    // Timeout for this client to get removed after a disconnection
+    public connectionTimeout: NodeJS.Timeout | null;
 
     constructor(socket: WebSocket) {
-        this.socket = socket;
         this.files = [];
+        this.socket = socket;
+        this.sessionKey = null;
+        this.connectionTimeout = null;
+
         Client.clients.push(this);
         log(`New client; Connected: ${Client.clients.length}`);
     }
@@ -31,7 +39,11 @@ export class Client {
         removeItem(Client.clients, download);
     }
 
-    public static resolveFile(id: string): [Client, HostedFile] | null {
+    public static resolveFile(id: string | unknown): [Client, HostedFile] | null {
+        if (typeof id !== 'string') {
+            return null;
+        }
+
         for (const client of Client.clients) {
             for (const file of client.files) {
                 if (file.id === id) {
@@ -41,6 +53,84 @@ export class Client {
         }
 
         return null;
+    }
+
+    public static restoreSession(
+        key: string | unknown,
+        newSocket: WebSocket
+    ): Client | null {
+        if (typeof key !== 'string') {
+            return null;
+        }
+
+        // Find client with the corresponding session-key
+        for (const client of Client.clients) {
+            if (
+                client.sessionKey !== null &&
+                client.sessionKey === key
+            ) {
+                if (client.restoreSession(newSocket)) {
+                    return client;
+                }
+
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    public disconnected(): void {
+        this.connectionTimeout = setTimeout(() => {
+            this.remove();
+        }, Client.CONNECTION_TIMEOUT);
+    }
+
+    public createSession(): boolean {
+        if (this.sessionKey === null) {
+            this.sessionKey = uid(); // TODO: Use stronger UID
+
+            this.sendJSON({
+                type: 'new-session',
+                payload: this.sessionKey
+            });
+
+            return true;
+        }
+
+        log('User does already have an active session.', LogLevel.ERROR);
+        return false;
+    }
+
+    public restoreSession(newSocket: WebSocket): boolean {
+
+        // Check if the session of the client got "invalidated"
+        if (this.connectionTimeout !== null) {
+            clearTimeout(this.connectionTimeout);
+
+            // Update socket
+            this.socket = newSocket;
+
+            // Reset timeout and create new session-key
+            this.connectionTimeout = null;
+            this.sessionKey = uid();
+
+            this.sendJSON({
+                type: 'restore-session',
+                payload: {
+                    key: this.sessionKey,
+                    files: this.files.map(value => ({
+                        name: value.name,
+                        id: value.id
+                    }))
+                }
+            });
+
+            return true;
+        }
+
+        log('Cannot reconnect because the client is already connected.', LogLevel.ERROR);
+        return false;
     }
 
     public remove(): void {

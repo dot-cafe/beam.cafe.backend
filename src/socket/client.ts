@@ -5,7 +5,7 @@ import {log, LogLevel} from '../logging';
 
 /* eslint-disable no-console */
 export const acceptClient = (ws: WebSocket): void => {
-    const client = new Client(ws);
+    let client = new Client(ws);
 
     ws.on('message', (message: string) => {
 
@@ -19,6 +19,23 @@ export const acceptClient = (ws: WebSocket): void => {
             const {type, payload} = JSON.parse(message);
 
             switch (type) {
+                case 'restore-session': {
+                    const oldClient = Client.restoreSession(payload, ws);
+
+                    if (oldClient) {
+                        client.remove();// TODO: This is ugly
+                        client = oldClient;
+                    }
+
+                    // TODO: What now?
+                    break;
+                }
+                case 'create-session': {
+
+                    // TODO: What if this fails
+                    client.createSession();
+                    break;
+                }
                 case 'download-keys': {
                     client.acceptFiles(payload);
                     break;
@@ -40,5 +57,7 @@ export const acceptClient = (ws: WebSocket): void => {
         }
     });
 
-    ws.on('close', () => client.remove());
+    ws.on('close', () => {
+        client.disconnected();
+    });
 };
