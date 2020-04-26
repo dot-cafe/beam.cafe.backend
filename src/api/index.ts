@@ -33,10 +33,14 @@ export const api = (): Router => {
 
     router.get('/d/:id', (req, res) => {
         const resolved = Client.resolveFile(req.params.id);
+        const file = resolved ? resolved[1] : null;
 
         ejs.renderFile(TEMPLATE_DOWNLOAD, {
             prettyBytes,
-            file: resolved ? resolved[1] : null
+            file: file ? {
+                ...file,
+                prettySize: prettyBytes(file.size)
+            } : null
         }, {cache: true}, (err, str) => {
             if (err) {
                 res.sendStatus(500);
