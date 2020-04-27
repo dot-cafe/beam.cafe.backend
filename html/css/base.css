@@ -11,3 +11,21 @@ body {
     height: 100%;
     width: 100%;
 }
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--c-background-secondary);
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+}

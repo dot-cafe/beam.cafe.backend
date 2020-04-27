@@ -1,10 +1,10 @@
-import {Router}                                         from 'express';
-import {Client}                                         from '../classes/Client';
-import {Download}                                       from '../classes/Download';
-import {TEMPLATE_DOWNLOAD, TEMPLATE_DOWNLOAD_NOT_FOUND} from '../constants';
-import {minifyHtml}                                     from '../utils/minify-html';
-import prettyBytes                                      from 'pretty-bytes';
-import ejs                                              from 'ejs';
+import ejs                                                                         from 'ejs';
+import {Router}                                                                    from 'express';
+import prettyBytes                                                                 from 'pretty-bytes';
+import {Client}                                                                    from '../classes/Client';
+import {Download}                                                                  from '../classes/Download';
+import {TEMPLATE_DOWNLOAD, TEMPLATE_DOWNLOAD_NOT_FOUND, TEMPLATE_DOWNLOAD_OFFLINE} from '../constants';
+import {minifyHtml}                                                                from '../utils/minify-html';
 
 export const api = (): Router => {
     const router = Router();
@@ -33,14 +33,23 @@ export const api = (): Router => {
 
     router.get('/d/:id', (req, res) => {
         const resolved = Client.resolveFile(req.params.id);
-        const file = resolved ? resolved[1] : null;
+        let template = TEMPLATE_DOWNLOAD_NOT_FOUND;
+        let file: unknown = null;
 
-        ejs.renderFile(file ? TEMPLATE_DOWNLOAD : TEMPLATE_DOWNLOAD_NOT_FOUND, {
-            prettyBytes,
-            file: file ? {
-                ...file,
-                prettySize: prettyBytes(file.size)
-            } : null
+        if (resolved) {
+            const [user, resolvedFile] = resolved;
+
+            // Change template if user is offline
+            if (user.connectionTimeout !== null) {
+                template = TEMPLATE_DOWNLOAD_OFFLINE;
+            } else {
+                template = TEMPLATE_DOWNLOAD;
+                file = resolvedFile;
+            }
+        }
+
+        ejs.renderFile(template, {
+            prettyBytes, file
         }, {}, (err, str) => {
             if (err) {
                 console.log(err);

@@ -22,7 +22,7 @@
 <main>
     <h3><%= file.name %></h3>
     <section>
-        <p>Size: <b><%= file.prettySize %></b></p>
+        <p>Size: <b><%= prettyBytes(file.size) %></b></p>
     </section>
 
     <a href="/file/<%= file.id %>" target="_blank">
@@ -38,8 +38,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'Nunito', sans-serif;
-        background: var(--c-background-secondary);
     }
 
     main {
@@ -101,7 +99,6 @@
 
     main a:hover {
         background: var(--c-primary-accent);
-        color: var(--c-text-secondary-accent);
     }
 </style>
 
