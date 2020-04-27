@@ -1,10 +1,10 @@
-import {Router}            from 'express';
-import {Client}            from '../classes/Client';
-import {Download}          from '../classes/Download';
-import {TEMPLATE_DOWNLOAD} from '../constants';
-import {minifyHtml}        from '../utils/minify-html';
-import prettyBytes         from 'pretty-bytes';
-import ejs                 from 'ejs';
+import {Router}                                         from 'express';
+import {Client}                                         from '../classes/Client';
+import {Download}                                       from '../classes/Download';
+import {TEMPLATE_DOWNLOAD, TEMPLATE_DOWNLOAD_NOT_FOUND} from '../constants';
+import {minifyHtml}                                     from '../utils/minify-html';
+import prettyBytes                                      from 'pretty-bytes';
+import ejs                                              from 'ejs';
 
 export const api = (): Router => {
     const router = Router();
@@ -35,14 +35,15 @@ export const api = (): Router => {
         const resolved = Client.resolveFile(req.params.id);
         const file = resolved ? resolved[1] : null;
 
-        ejs.renderFile(TEMPLATE_DOWNLOAD, {
+        ejs.renderFile(file ? TEMPLATE_DOWNLOAD : TEMPLATE_DOWNLOAD_NOT_FOUND, {
             prettyBytes,
             file: file ? {
                 ...file,
                 prettySize: prettyBytes(file.size)
             } : null
-        }, {cache: true}, (err, str) => {
+        }, {}, (err, str) => {
             if (err) {
+                console.log(err);
                 res.sendStatus(500);
             } else {
                 res.send(minifyHtml(str));

@@ -4,94 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet">
 
-    <%
-    title = file ? `Download ${file.name}` : 'File not found';
-    seoTitle = file ? 'Something got beamed up for you!' : 'Whoops, nothing to see here.';
-    seoDescription = file ? `Click this link to download "${file.name}" (${prettyBytes(file.size)})` : 'Contact your peer if you believe this is a mistake.';
-    %>
+    <%- include('../partials/seo.ejs', {
+    title: 'Something got beamed up for you!',
+    description: `Click this link to download "${file.name}" (${prettyBytes(file.size)})`
+    }) %>
 
-    <!-- Theme color -->
-    <meta name="theme-color" content="#3d7cf9"/>
-    <meta name="msapplication-navbutton-color" content="#3d7cf9"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="#3d7cf9"/>
+    <title><%= `Download "${file.name}"` %></title>
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:image" content="/favicon.ico"/>
-    <meta property="og:type" content="website"/>
-    <meta property="og:url" content="https://beam.cafe"/>
-    <meta property="og:site_name" content="Beam Cafe"/>
-    <meta property="og:title" content="<%= seoTitle %>"/>
-    <meta property="og:description" content="<%= seoDescription %>"/>
-
-    <!-- Twitter -->
-    <meta property="twitter:url" content="https://beam.cafe">
-    <meta property="twitter:title" content="<%= seoTitle %>">
-    <meta property="twitter:description" content="<%= seoDescription %>">
-    <meta property="twitter:image" content="/favicon.ico">
-
-    <title><%= title %></title>
-
-    <!-- Icons -->
-    <link rel="icon" href="/favicon.ico"/>
-    <link rel="fluid-icon" href="/favicon.ico"/>
-    <link rel="apple-touch-icon" href="/favicon.ico"/>
-    <link rel="manifest" href="/manifest.json">
+    <!-- Base styles -->
+    <style><%- include('../css/animations.css') %></style>
+    <style><%- include('../css/theme.css') %></style>
+    <style><%- include('../css/base.css') %></style>
 </head>
 <body>
 
-<% if(file) { %>
-    <main class="ok">
-        <h3><%= file.name %></h3>
-        <section>
-            <p>Size: <b><%= file.prettySize %></b></p>
-        </section>
-        <a href="/file/<%= file.id %>" target="_blank">Download File</a>
-    </main>
-<% } else { %>
-    <main class="error">
-        <p>File not found.</p>
-        <p>Ask your peer if you believe this is a mistake.</p>
-    </main>
-<% } %>
+<main>
+    <h3><%= file.name %></h3>
+    <section>
+        <p>Size: <b><%= file.prettySize %></b></p>
+    </section>
+
+    <a href="/file/<%= file.id %>" target="_blank">
+        <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px">
+            <path d="M 11 2 C 10.448 2 10 2.448 10 3 L 10 11 L 6.5 11 A 0.5 0.5 0 0 0 6 11.5 A 0.5 0.5 0 0 0 6.1464844 11.853516 A 0.5 0.5 0 0 0 6.1777344 11.882812 L 11.283203 16.697266 L 11.316406 16.728516 A 1 1 0 0 0 12 17 A 1 1 0 0 0 12.683594 16.728516 L 12.697266 16.716797 A 1 1 0 0 0 12.707031 16.705078 L 17.810547 11.892578 A 0.5 0.5 0 0 0 17.839844 11.865234 L 17.847656 11.859375 A 0.5 0.5 0 0 0 17.853516 11.853516 A 0.5 0.5 0 0 0 18 11.5 A 0.5 0.5 0 0 0 17.5 11 L 14 11 L 14 3 C 14 2.448 13.552 2 13 2 L 12 2 L 11 2 z M 3 20 A 1.0001 1.0001 0 1 0 3 22 L 21 22 A 1.0001 1.0001 0 1 0 21 20 L 3 20 z"/>
+        </svg>
+        <span>Download</span>
+    </a>
+</main>
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    :root {
-        --c-red: #ff252f;
-        --c-red-accent: #e51f1f;
-
-        --c-text-primary: #242930;
-        --c-text-primary-accent: #4b515d;
-        --c-text-secondary: #b6b9bf;
-        --c-text-secondary-accent: #fff;
-        --c-background-primary: #fff;
-        --c-background-secondary: #e8e9eb;
-        --c-primary: #3d7cf9;
-        --c-primary-accent: #3071ea;
-    }
-
-    @media screen and (prefers-color-scheme: dark) {
-        :root {
-            --c-text-primary: #fafafa;
-            --c-text-primary-accent: #dcddde;
-            --c-text-secondary: #565a61;
-            --c-background-primary: #2f3136;
-            --c-background-secondary: #202225;
-        }
-    }
-
-    html,
-    body {
-        height: 100%;
-    }
-
     body {
         display: flex;
         align-items: center;
@@ -112,63 +54,55 @@
         animation: fadeIn 0.5s ease-in-out;
     }
 
-    main.ok h3 {
+    main h3 {
         font-size: 1.25em;
         text-align: center;
         color: var(--c-text-primary);
-        margin: 0.5em 0 0.5em;
+        margin: 0.5em 0 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 20em;
     }
 
-    main.ok section {
+    main section {
         display: flex;
         align-items: center;
         justify-content: center;
         white-space: pre-wrap;
-        margin-bottom: 0.75em;
+        margin: 0.75em 0;
         color: var(--c-text-primary-accent);
         font-size: 0.9em;
     }
 
-    main.ok a {
+    main a {
+        display: flex;
+        align-items: center;
         text-decoration: none;
         background: var(--c-primary);
         color: var(--c-text-secondary-accent);
-        margin: 0 auto 0.5em;
-        padding: 0.5em 3em;
+        margin: 0.5em auto 0.5em;
+        padding: 0.5em 1.15em;
         border-radius: 0.25em;
         transition: all 0.3s;
+        font-size: 1.1em;
     }
 
-    main.ok a:hover {
+    main a svg {
+        width: 1em;
+        height: 1em;
+        fill: var(--c-text-secondary-accent);
+        margin-right: 0.5em;
+    }
+
+    main a span {
+        font-size: 0.9em;
+    }
+
+    main a:hover {
         background: var(--c-primary-accent);
         color: var(--c-text-secondary-accent);
     }
-
-    main.error {
-        background: var(--c-red);
-        text-align: center;
-        line-height: 1.75em;
-    }
-
-    .ain.error p {
-        color: var(--c-text-secondary-accent);
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-1em);
-        }
-        to {
-            opacity: 1;
-            transform: none;
-        }
-    }
-
 </style>
 
 </body>
