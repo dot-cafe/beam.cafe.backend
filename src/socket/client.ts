@@ -2,6 +2,7 @@ import * as WebSocket  from 'ws';
 import {Client}        from '../classes/Client';
 import {Download}      from '../classes/Download';
 import {log, LogLevel} from '../logging';
+import {handleRequest} from './request';
 
 /* eslint-disable no-console */
 export const acceptClient = (ws: WebSocket): void => {
@@ -19,6 +20,18 @@ export const acceptClient = (ws: WebSocket): void => {
             const {type, payload} = JSON.parse(message);
 
             switch (type) {
+                case 'request': {
+                    if (
+                        typeof payload.id !== 'string' ||
+                        typeof payload.type !== 'string'
+                    ) {
+                        log(`Invalid websocket request`, LogLevel.ERROR);
+                        break;
+                    }
+
+                    handleRequest(client, payload);
+                    break;
+                }
                 case 'restore-session': {
                     const oldClient = Client.restoreSession(payload, ws);
 

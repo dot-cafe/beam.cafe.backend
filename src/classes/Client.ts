@@ -15,11 +15,16 @@ type IncomingFiles = {
     size: number | unknown;
 }
 
+type Settings = {
+    strictSession: boolean;
+}
+
 export class Client {
     public static readonly CONNECTION_TIMEOUT = 1000 * 60 * 15; // 15 Minutes
     public static readonly SESSION_KEY_SIZE = 64;
     public static readonly clients: Array<Client> = [];
     public readonly files: Array<HostedFile>;
+    public readonly settings: Settings;
     public socket: WebSocket;
     public sessionKey: string | null;
 
@@ -31,6 +36,9 @@ export class Client {
         this.socket = socket;
         this.sessionKey = null;
         this.connectionTimeout = null;
+        this.settings = {
+            strictSession: false
+        };
 
         Client.clients.push(this);
         log(`New client; Connected: ${Client.clients.length}`);
@@ -82,9 +90,13 @@ export class Client {
     }
 
     public disconnected(): void {
-        this.connectionTimeout = setTimeout(() => {
+        if (this.settings.strictSession) {
             this.remove();
-        }, Client.CONNECTION_TIMEOUT);
+        } else {
+            this.connectionTimeout = setTimeout(() => {
+                this.remove();
+            }, Client.CONNECTION_TIMEOUT);
+        }
     }
 
     public createSession(): boolean {
@@ -216,7 +228,7 @@ export class Client {
         }
     }
 
-    private sendJSON(value: Message): void {
+    public sendJSON(value: Message): void {
         this.socket.send(JSON.stringify(value));
     }
 }
