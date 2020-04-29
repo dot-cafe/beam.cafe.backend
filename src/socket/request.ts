@@ -1,5 +1,5 @@
-import {Client}        from '../classes/Client';
-import {log, LogLevel} from '../logging';
+import {Client, ClientSettings} from '../classes/Client';
+import {log, LogLevel}          from '../logging';
 
 export type WSRequest = {
     data: unknown;
@@ -7,7 +7,7 @@ export type WSRequest = {
     id: string;
 }
 
-function respondTo(client: Client, id: string, ok: boolean, data: unknown = null) {
+function respondTo(client: Client, id: string, ok: boolean, data: unknown = null): void {
 
     // TODO: Add sendMessage function with (type, payload) args
     client.sendJSON({
@@ -19,12 +19,21 @@ function respondTo(client: Client, id: string, ok: boolean, data: unknown = null
 export function handleRequest(
     client: Client,
     request: WSRequest
-) {
+): void {
     const {id, data, type} = request;
 
     switch (type) {
-        case 'strict-session': {
-            client.settings.strictSession = !!data;
+        case 'settings': {
+            if (!ClientSettings.validate(data)) {
+                log('Cannot sync settings: data is invalid', LogLevel.ERROR);
+                break;
+            }
+
+            /* eslint-disable @typescript-eslint/no-explicit-any */
+            for (const [key, value] of Object.entries(data as object)) {
+                client.applySetting(key as any, value);
+            }
+
             respondTo(client, id, true);
             break;
         }

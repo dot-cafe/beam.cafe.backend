@@ -40,7 +40,7 @@ export const api = (): Router => {
             const [user, resolvedFile] = resolved;
 
             // Change template if user is offline
-            if (user.connectionTimeout !== null) {
+            if (user.isDisconnected()) {
                 template = TEMPLATE_DOWNLOAD_OFFLINE;
             } else {
                 template = TEMPLATE_DOWNLOAD;
@@ -52,7 +52,6 @@ export const api = (): Router => {
             prettyBytes, file
         }, {}, (err, str) => {
             if (err) {
-                console.log(err);
                 res.sendStatus(500);
             } else {
                 res.send(minifyHtml(str));

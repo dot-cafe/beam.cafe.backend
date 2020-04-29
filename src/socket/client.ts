@@ -25,7 +25,7 @@ export const acceptClient = (ws: WebSocket): void => {
                         typeof payload.id !== 'string' ||
                         typeof payload.type !== 'string'
                     ) {
-                        log(`Invalid websocket request`, LogLevel.ERROR);
+                        log('Invalid websocket request', LogLevel.ERROR);
                         break;
                     }
 

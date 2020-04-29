@@ -1,3 +1,4 @@
+import Joi             from '@hapi/joi';
 import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
@@ -19,26 +20,32 @@ type Settings = {
     strictSession: boolean;
 }
 
+export const ClientSettings = Joi.object({
+    strictSession: Joi.boolean().optional()
+});
+
 export class Client {
+    public static readonly DEFAULT_SETTINGS: Settings = {
+        strictSession: false
+    };
+
     public static readonly CONNECTION_TIMEOUT = 1000 * 60 * 15; // 15 Minutes
     public static readonly SESSION_KEY_SIZE = 64;
     public static readonly clients: Array<Client> = [];
-    public readonly files: Array<HostedFile>;
-    public readonly settings: Settings;
-    public socket: WebSocket;
-    public sessionKey: string | null;
+    private readonly files: Array<HostedFile>;
+    private readonly settings: Settings;
+    private socket: WebSocket;
+    private sessionKey: string | null;
 
     // Timeout for this client to get removed after a disconnection
-    public connectionTimeout: NodeJS.Timeout | null;
+    private connectionTimeout: NodeJS.Timeout | null;
 
     constructor(socket: WebSocket) {
         this.files = [];
         this.socket = socket;
         this.sessionKey = null;
         this.connectionTimeout = null;
-        this.settings = {
-            strictSession: false
-        };
+        this.settings = {...Client.DEFAULT_SETTINGS};
 
         Client.clients.push(this);
         log(`New client; Connected: ${Client.clients.length}`);
@@ -97,6 +104,10 @@ export class Client {
                 this.remove();
             }, Client.CONNECTION_TIMEOUT);
         }
+    }
+
+    public isDisconnected(): boolean {
+        return this.connectionTimeout === null;
     }
 
     public createSession(): boolean {
@@ -230,5 +241,14 @@ export class Client {
 
     public sendJSON(value: Message): void {
         this.socket.send(JSON.stringify(value));
+    }
+
+    public applySetting<K extends keyof Settings>(key: K, value: Settings[K]): boolean {
+        if (key in Client.DEFAULT_SETTINGS) {
+            this.settings[key] = value;
+            return true;
+        }
+
+        return false;
     }
 }
