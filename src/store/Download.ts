@@ -1,9 +1,9 @@
 import {Request, Response} from 'express';
 import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
-import {removeItem}        from '../utils/array';
 import {uid}               from '../utils/uid';
 import {Client}            from './Client';
+import {downloads}         from './downloads';
 
 /**
  * Status of a download
@@ -18,7 +18,6 @@ export enum DownloadStatus {
 }
 
 export class Download {
-    public static downloads: Array<Download> = [];
 
     // Download ID
     public readonly id: string;
@@ -27,14 +26,14 @@ export class Download {
     public readonly file: HostedFile;
 
     // The uploader / source
-    private readonly provider: Client;
+    public readonly provider: Client;
 
     // The downloader's response
     private readonly downloaderResponse: Response;
 
     // Download status
-    private status: DownloadStatus = DownloadStatus.Pending;
-    private done = false;
+    public status: DownloadStatus = DownloadStatus.Pending;
+    public done = false;
 
     // Amount of bytes transferred
     private bytesTransferred = 0;
@@ -58,68 +57,25 @@ export class Download {
 
         // Initiate transfer
         fileProvider.requestFile(file.id, this.id);
-        Download.downloads.push(this);
+        downloads.add(this);
         log(`Download started; ID: ${this.id}`);
     }
 
-    public static byId(id: string): Download | null {
-        return Download.downloads.find(v => v.id === id) || null;
-    }
-
-    public static fromClient(client: Client): Array<Download> {
-        return Download.downloads.filter(value => value.provider === client);
-    }
-
-    public static acceptUpload(
-        uploaderRequest: Request,
-        uploaderResponse: Response,
-        downloadId: string
-    ): boolean {
-        const download = Download.byId(downloadId);
-
-        if (!download) {
-            log(`Invalid download; ID: ${downloadId}`, LogLevel.VERBOSE);
-            return false;
-        } else if (download.status !== DownloadStatus.Pending) {
-            log('Upload is already active', LogLevel.ERROR);
-            return false;
-        }
-
-        download.accept(uploaderRequest, uploaderResponse);
-        return true;
-    }
-
-    public static cancelUpload(downloadId: string): boolean {
-        const download = Download.byId(downloadId);
-
-        if (download && (
-            download.status === DownloadStatus.Pending ||
-            download.status === DownloadStatus.Active
-        )) {
-            download.cancel();
-            return true;
-        }
-
-        log(`Cannot find download to cancel; ID: ${downloadId}`, LogLevel.VERBOSE);
-        return false;
-    }
-
-    public static remove(download: Download): void {
-        removeItem(Download.downloads, download);
-    }
-
     public remove(): void {
-        Download.remove(this);
-        log(`Download removed; Remaining: ${Download.downloads.length}`, LogLevel.SILLY);
+        downloads.remove(this);
+        log(`Download removed; Remaining: ${downloads.amount}`, LogLevel.SILLY);
     }
 
     public cancel(): void {
+        if (this.status === DownloadStatus.Pending ||
+            this.status === DownloadStatus.Active) {
+
+            // This raises a network-error on the client, end would lead to an incomplete file.
+            this.downloaderResponse.destroy();
+            log('Download cancelled.', LogLevel.SILLY);
+        }
+
         this.status = DownloadStatus.Cancelled;
-
-        // This raises a network-error on the client, end would lead to an incomplete file.
-        this.downloaderResponse.destroy();
-        log('Download cancelled.', LogLevel.SILLY);
-
         this.remove();
     }
 

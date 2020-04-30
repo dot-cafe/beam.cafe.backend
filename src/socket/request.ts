@@ -1,4 +1,4 @@
-import {Client, ClientSettings} from '../classes/Client';
+import {Client, ClientSettings} from '../store/Client';
 import {log, LogLevel}          from '../logging';
 
 export type WSRequest = {

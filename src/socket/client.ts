@@ -1,6 +1,7 @@
 import * as WebSocket  from 'ws';
-import {Client}        from '../classes/Client';
-import {Download}      from '../classes/Download';
+import {Client}        from '../store/Client';
+import {clients}       from '../store/clients';
+import {downloads}     from '../store/downloads';
 import {log, LogLevel} from '../logging';
 import {handleRequest} from './request';
 
@@ -33,7 +34,7 @@ export const acceptClient = (ws: WebSocket): void => {
                     break;
                 }
                 case 'restore-session': {
-                    const oldClient = Client.restoreSession(payload, ws);
+                    const oldClient = clients.restoreSession(payload, ws);
 
                     if (oldClient) {
 
@@ -57,7 +58,7 @@ export const acceptClient = (ws: WebSocket): void => {
                     break;
                 }
                 case 'cancel-request': {
-                    Download.cancelUpload(payload);
+                    downloads.cancelUpload(payload);
                     break;
                 }
                 case 'remove-file': {

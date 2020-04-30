@@ -1,8 +1,9 @@
 import ejs                                                                         from 'ejs';
 import {Router}                                                                    from 'express';
 import prettyBytes                                                                 from 'pretty-bytes';
-import {Client}                                                                    from '../classes/Client';
-import {Download}                                                                  from '../classes/Download';
+import {clients}                                                                   from '../store/clients';
+import {Download}                                                                  from '../store/Download';
+import {downloads}                                                                 from '../store/downloads';
 import {TEMPLATE_DOWNLOAD, TEMPLATE_DOWNLOAD_NOT_FOUND, TEMPLATE_DOWNLOAD_OFFLINE} from '../constants';
 import {minifyHtml}                                                                from '../utils/minify-html';
 
@@ -12,7 +13,7 @@ export const api = (): Router => {
     router.post('/file/:id', (req, res) => {
 
         // Validate id
-        if (Download.acceptUpload(req, res, req.params.id)) {
+        if (downloads.acceptUpload(req, res, req.params.id)) {
             return;
         }
 
@@ -20,7 +21,7 @@ export const api = (): Router => {
     });
 
     router.get('/file/:id', (req, res) => {
-        const resolved = Client.resolveFile(req.params.id);
+        const resolved = clients.resolveFile(req.params.id);
 
         // Validate provider
         if (resolved) {
@@ -32,7 +33,7 @@ export const api = (): Router => {
     });
 
     router.get('/d/:id', (req, res) => {
-        const resolved = Client.resolveFile(req.params.id);
+        const resolved = clients.resolveFile(req.params.id);
         let template = TEMPLATE_DOWNLOAD_NOT_FOUND;
         let file: unknown = null;
 

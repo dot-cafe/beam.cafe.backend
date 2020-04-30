@@ -2,14 +2,9 @@ import Joi             from '@hapi/joi';
 import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
-import {removeItem}    from '../utils/array';
 import {uid}           from '../utils/uid';
-import {Download}      from './Download';
-
-type Message = {
-    type: string;
-    payload: unknown;
-}
+import {clients}       from './clients';
+import {downloads}     from './downloads';
 
 type IncomingFiles = {
     name: string | unknown;
@@ -25,17 +20,16 @@ export const ClientSettings = Joi.object({
 });
 
 export class Client {
+    public static readonly CONNECTION_TIMEOUT = 1000 * 60 * 15; // 15 Minutes
+    public static readonly SESSION_KEY_SIZE = 64;
     public static readonly DEFAULT_SETTINGS: Settings = {
         strictSession: false
     };
 
-    public static readonly CONNECTION_TIMEOUT = 1000 * 60 * 15; // 15 Minutes
-    public static readonly SESSION_KEY_SIZE = 64;
-    public static readonly clients: Array<Client> = [];
-    private readonly files: Array<HostedFile>;
-    private readonly settings: Settings;
-    private socket: WebSocket;
-    private sessionKey: string | null;
+    public readonly files: Array<HostedFile>;
+    public readonly settings: Settings;
+    public socket: WebSocket;
+    public sessionKey: string | null;
 
     // Timeout for this client to get removed after a disconnection
     private connectionTimeout: NodeJS.Timeout | null;
@@ -47,53 +41,8 @@ export class Client {
         this.connectionTimeout = null;
         this.settings = {...Client.DEFAULT_SETTINGS};
 
-        Client.clients.push(this);
-        log(`New client; Connected: ${Client.clients.length}`);
-    }
-
-    public static remove(download: Client): void {
-        removeItem(Client.clients, download);
-    }
-
-    public static resolveFile(id: string | unknown): [Client, HostedFile] | null {
-        if (typeof id !== 'string') {
-            return null;
-        }
-
-        for (const client of Client.clients) {
-            for (const file of client.files) {
-                if (file.id === id) {
-                    return [client, file];
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public static restoreSession(
-        key: string | unknown,
-        newSocket: WebSocket
-    ): Client | null {
-        if (typeof key !== 'string') {
-            return null;
-        }
-
-        // Find client with the corresponding session-key
-        for (const client of Client.clients) {
-            if (
-                client.sessionKey !== null &&
-                client.sessionKey === key
-            ) {
-                if (client.restoreSession(newSocket)) {
-                    return client;
-                }
-
-                break;
-            }
-        }
-
-        return null;
+        clients.add(this);
+        log(`New client; Connected: ${clients.amount}`);
     }
 
     public disconnected(): void {
@@ -153,14 +102,14 @@ export class Client {
     public remove(): void {
 
         // Cancel all downloads
-        const pendingDownloads = Download.fromClient(this);
+        const pendingDownloads = downloads.byClient(this);
         for (const download of pendingDownloads) {
             download.cancel();
         }
 
         // Remove client
-        Client.remove(this);
-        log(`Client disconnected; Remaining: ${Client.clients.length}; Downloads cancelled: ${pendingDownloads.length}`);
+        clients.remove(this);
+        log(`Client disconnected; Remaining: ${clients.amount}; Downloads cancelled: ${pendingDownloads.length}`);
     }
 
     public acceptFiles(incomingFiles: Array<IncomingFiles>): void {
@@ -213,15 +162,12 @@ export class Client {
         if (file) {
 
             // Cancel downloads associated with it
-            let removed = 0;
-            for (const download of Download.downloads) {
-                if (download.file.id === id) {
-                    download.cancel();
-                    removed++;
-                }
+            const active = downloads.byFileId(file.id);
+            for (const download of active) {
+                download.cancel();
             }
 
-            log(`File removed; ${removed} downloads cancelled`);
+            log(`File removed; ${active.length} downloads cancelled`);
         } else {
             log('Cannot remove file because it does not exist', LogLevel.WARNING);
         }
@@ -230,7 +176,7 @@ export class Client {
     public refreshKeys(): void {
 
         // Cancel all downloads
-        for (const download of Download.fromClient(this)) {
+        for (const download of downloads.byClient(this)) {
             download.cancel();
         }
 
