@@ -107,7 +107,7 @@ export class Client {
     }
 
     public isDisconnected(): boolean {
-        return this.connectionTimeout === null;
+        return this.connectionTimeout !== null;
     }
 
     public createSession(): boolean {
@@ -237,6 +237,31 @@ export class Client {
         } else {
             log('Cannot remove file because it does not exist', LogLevel.WARNING);
         }
+    }
+
+    public refreshKeys(): void {
+
+        // Cancel all downloads
+        for (const download of Download.fromClient(this)) {
+            download.cancel();
+        }
+
+        // Generate new keys
+        const files: Array<unknown> = [];
+        for (const file of this.files) {
+            const newId = uid();
+            file.id = newId;
+
+            files.push({
+                id: newId,
+                name: file.name
+            });
+        }
+
+        this.sendJSON({
+            type: 'file-registrations',
+            payload: files
+        });
     }
 
     public sendJSON(value: Message): void {

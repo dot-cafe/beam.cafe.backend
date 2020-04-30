@@ -37,7 +37,13 @@ export function handleRequest(
             respondTo(client, id, true);
             break;
         }
+        case 'reset-keys': {
+            client.refreshKeys();
+            respondTo(client, id, true);
+            break;
+        }
         default: {
+            respondTo(client, id, false);
             log(`Unknown websockt request: ${type}`, LogLevel.ERROR);
             break;
         }
