@@ -195,10 +195,10 @@ export class Download {
                 this.status = DownloadStatus.PeerReset;
                 this.done = true;
 
-                this.provider.socket.send(JSON.stringify({
+                this.provider.sendJSON({
                     type: 'download-cancelled',
                     payload: this.id
-                }));
+                });
 
                 // Cleanup
                 this.remove();
