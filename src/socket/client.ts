@@ -1,3 +1,4 @@
+import {Request}       from 'express';
 import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
@@ -6,8 +7,8 @@ import {downloads}     from '../store/downloads';
 import {handleRequest} from './request';
 
 /* eslint-disable no-console */
-export const acceptClient = (ws: WebSocket): void => {
-    let client = new Client(ws);
+export const acceptClient = (ws: WebSocket, req: Request): void => {
+    let client = new Client(ws, req);
 
     ws.on('message', (message: string) => {
 

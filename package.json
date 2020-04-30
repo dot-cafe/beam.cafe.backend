@@ -27,6 +27,7 @@
     "dependencies": {
         "@hapi/joi": "^17.1.1",
         "@types/hapi__joi": "^16.0.12",
+        "bowser": "^2.9.0",
         "cors": "^2.8.5",
         "ejs": "^3.1.2",
         "express": "^4.17.1",

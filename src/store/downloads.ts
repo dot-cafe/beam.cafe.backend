@@ -45,7 +45,7 @@ export const downloads = new class {
         const download = this.byId(downloadId);
 
         if (!download) {
-            log(`Invalid download; ID: ${downloadId}`, LogLevel.VERBOSE);
+            log(`Invalid download; Download ID: ${downloadId}`, LogLevel.VERBOSE);
             return false;
         } else if (download.status !== DownloadStatus.Pending) {
             log('Upload is already active', LogLevel.ERROR);
@@ -64,7 +64,7 @@ export const downloads = new class {
             return true;
         }
 
-        log(`Cannot find download to cancel; ID: ${downloadId}`, LogLevel.VERBOSE);
+        log(`Cannot find download to cancel; Download ID: ${downloadId}`, LogLevel.VERBOSE);
         return false;
     }
 };

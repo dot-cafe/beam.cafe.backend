@@ -58,7 +58,7 @@ export class Download {
         // Add to downloads and initiate transfer
         downloads.add(this);
         fileProvider.requestFile(file.id, this.id);
-        log(`Download started; ID: ${this.id}`);
+        log('Download started', LogLevel.SILLY);
     }
 
     public cancel(): void {

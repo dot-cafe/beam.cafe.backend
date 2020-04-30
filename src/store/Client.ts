@@ -1,10 +1,12 @@
-import Joi             from '@hapi/joi';
-import * as WebSocket  from 'ws';
-import {log, LogLevel} from '../logging';
-import {HostedFile}    from '../types';
-import {uid}           from '../utils/uid';
-import {clients}       from './clients';
-import {downloads}     from './downloads';
+import Joi                from '@hapi/joi';
+import {Request}          from 'express';
+import * as WebSocket     from 'ws';
+import {log, LogLevel}    from '../logging';
+import {HostedFile}       from '../types';
+import {decryptUserAgent} from '../utils/decrypt-user-agent';
+import {uid}              from '../utils/uid';
+import {clients}          from './clients';
+import {downloads}        from './downloads';
 
 type IncomingFiles = {
     name: string | unknown;
@@ -34,15 +36,17 @@ export class Client {
     // Timeout for this client to get removed after a disconnection
     private connectionTimeout: NodeJS.Timeout | null;
 
-    constructor(socket: WebSocket) {
+    constructor(socket: WebSocket, req: Request) {
         this.files = [];
         this.socket = socket;
         this.sessionKey = null;
         this.connectionTimeout = null;
         this.settings = {...Client.DEFAULT_SETTINGS};
+        const userAgent = req.headers['user-agent'];
+        const info = userAgent ? decryptUserAgent(userAgent) : 'unknown';
 
         clients.add(this);
-        log(`New client; Connected: ${clients.amount}`);
+        log(`New client; Connected: ${clients.amount}; UA: ${info}`, LogLevel.SILLY);
     }
 
     public get disconnected(): boolean {
