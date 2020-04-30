@@ -7,14 +7,8 @@ export type WSRequest = {
     id: string;
 }
 
-function respondTo(client: Client, id: string, ok: boolean, data: unknown = null): void {
-
-    // TODO: Add sendMessage function with (type, payload) args
-    client.sendJSON({
-        type: 'response',
-        payload: {id, ok, data}
-    });
-}
+const respondTo = (client: Client, id: string, ok: boolean, data: unknown = null): void =>
+    client.sendMessage('response', {id, ok, data});
 
 export function handleRequest(
     client: Client,

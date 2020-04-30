@@ -113,11 +113,7 @@ export class Client {
     public createSession(): boolean {
         if (this.sessionKey === null) {
             this.sessionKey = uid(Client.SESSION_KEY_SIZE);
-
-            this.sendJSON({
-                type: 'new-session',
-                payload: this.sessionKey
-            });
+            this.sendMessage('new-session', this.sessionKey);
 
             return true;
         }
@@ -139,15 +135,12 @@ export class Client {
             this.connectionTimeout = null;
             this.sessionKey = uid(Client.SESSION_KEY_SIZE);
 
-            this.sendJSON({
-                type: 'restore-session',
-                payload: {
-                    key: this.sessionKey,
-                    files: this.files.map(value => ({
-                        name: value.name,
-                        id: value.id
-                    }))
-                }
+            this.sendMessage('restore-session', {
+                key: this.sessionKey,
+                files: this.files.map(value => ({
+                    name: value.name,
+                    id: value.id
+                }))
             });
 
             return true;
@@ -187,13 +180,11 @@ export class Client {
             }
         }
 
-        this.sendJSON({
-            type: 'file-registrations',
-            payload: files.map(value => ({
-                id: value.id,
-                name: value.name
-            }))
-        });
+
+        this.sendMessage('file-registrations', files.map(value => ({
+            id: value.id,
+            name: value.name
+        })));
 
         this.files.push(...files);
     }
@@ -203,12 +194,9 @@ export class Client {
         downloadId: string
     ): void {
         if (this.files.some(value => value.id === fileId)) {
-            this.sendJSON({
-                type: 'file-request',
-                payload: {
-                    downloadId,
-                    fileId
-                }
+            this.sendMessage('file-request', {
+                downloadId,
+                fileId
             });
         } else {
             log('Requested file does not exist any longer', LogLevel.INFO);
@@ -258,14 +246,7 @@ export class Client {
             });
         }
 
-        this.sendJSON({
-            type: 'file-registrations',
-            payload: files
-        });
-    }
-
-    public sendJSON(value: Message): void {
-        this.socket.send(JSON.stringify(value));
+        this.sendMessage('file-registrations', files);
     }
 
     public applySetting<K extends keyof Settings>(key: K, value: Settings[K]): boolean {
@@ -275,5 +256,9 @@ export class Client {
         }
 
         return false;
+    }
+
+    public sendMessage(type: string, payload: unknown = null): void {
+        this.socket.send(JSON.stringify({type, payload}));
     }
 }
