@@ -1,10 +1,10 @@
 import ejs                                                                         from 'ejs';
 import {Router}                                                                    from 'express';
 import prettyBytes                                                                 from 'pretty-bytes';
+import {TEMPLATE_DOWNLOAD, TEMPLATE_DOWNLOAD_NOT_FOUND, TEMPLATE_DOWNLOAD_OFFLINE} from '../constants';
 import {clients}                                                                   from '../store/clients';
 import {Download}                                                                  from '../store/Download';
 import {downloads}                                                                 from '../store/downloads';
-import {TEMPLATE_DOWNLOAD, TEMPLATE_DOWNLOAD_NOT_FOUND, TEMPLATE_DOWNLOAD_OFFLINE} from '../constants';
 import {minifyHtml}                                                                from '../utils/minify-html';
 
 export const api = (): Router => {
@@ -41,7 +41,7 @@ export const api = (): Router => {
             const [user, resolvedFile] = resolved;
 
             // Change template if user is offline
-            if (user.isDisconnected()) {
+            if (user.disconnected) {
                 template = TEMPLATE_DOWNLOAD_OFFLINE;
             } else {
                 template = TEMPLATE_DOWNLOAD;

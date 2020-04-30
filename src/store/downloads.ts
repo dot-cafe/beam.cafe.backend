@@ -16,6 +16,7 @@ export const downloads = new class {
 
     public remove(download: Download): void {
         this.list.delete(download);
+        log(`Download removed; Remaining: ${downloads.amount}`, LogLevel.SILLY);
     }
 
     public byId(id: string): Download | null {

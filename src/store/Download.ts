@@ -55,15 +55,10 @@ export class Download {
         this.file = file;
         this.id = uid();
 
-        // Initiate transfer
-        fileProvider.requestFile(file.id, this.id);
+        // Add to downloads and initiate transfer
         downloads.add(this);
+        fileProvider.requestFile(file.id, this.id);
         log(`Download started; ID: ${this.id}`);
-    }
-
-    public remove(): void {
-        downloads.remove(this);
-        log(`Download removed; Remaining: ${downloads.amount}`, LogLevel.SILLY);
     }
 
     public cancel(): void {
@@ -76,16 +71,20 @@ export class Download {
         }
 
         this.status = DownloadStatus.Cancelled;
-        this.remove();
+        downloads.remove(this);
     }
 
     public accept(
         uploaderRequest: Request,
         uploaderResponse: Response
     ): void {
+        if (this.status !== DownloadStatus.Pending) {
+            log('Upload rejected because the download is not in a pending state.', LogLevel.ERROR);
+            return;
+        }
+
         const {downloaderResponse} = this;
         this.status = DownloadStatus.Active;
-
         if (!this.headersSent) {
 
             /**
@@ -117,7 +116,7 @@ export class Download {
             this.done = true;
 
             // Clean up
-            this.remove();
+            downloads.remove(this);
         });
 
         uploaderRequest.on('close', () => {
@@ -140,7 +139,7 @@ export class Download {
             this.done = true;
 
             // Clean up
-            this.remove();
+            downloads.remove(this);
         });
 
         // Dectect if the downloader closes the connection
@@ -154,7 +153,7 @@ export class Download {
                 this.provider.sendMessage('download-cancelled', this.id);
 
                 // Cleanup
-                this.remove();
+                downloads.remove(this);
             }
         });
     }

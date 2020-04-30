@@ -2,6 +2,7 @@ import * as fs       from 'fs';
 import {WriteStream} from 'fs';
 import * as path     from 'path';
 
+const LOG_FILE_STREAM_OPTIONS = {flags: 'a'};
 const LOG_DIRECTORY = path.resolve('./.logs');
 const CENTRALIZED_LOGS = path.join(LOG_DIRECTORY, 'all.log');
 if (!fs.existsSync(LOG_DIRECTORY)) {
@@ -18,11 +19,11 @@ export enum LogLevel {
 }
 
 const logStreams = new Map<LogLevel, WriteStream>();
-const all = fs.createWriteStream(CENTRALIZED_LOGS);
+const all = fs.createWriteStream(CENTRALIZED_LOGS, LOG_FILE_STREAM_OPTIONS);
 
 for (const [level] of Object.entries(LogLevel)) {
     const logFile = path.resolve(LOG_DIRECTORY, `${level.toLowerCase()}.log`);
-    const stream = fs.createWriteStream(logFile);
+    const stream = fs.createWriteStream(logFile, LOG_FILE_STREAM_OPTIONS);
     logStreams.set(level as LogLevel, stream);
 }
 

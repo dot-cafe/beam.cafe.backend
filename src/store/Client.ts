@@ -45,18 +45,19 @@ export class Client {
         log(`New client; Connected: ${clients.amount}`);
     }
 
-    public disconnected(): void {
-        if (this.settings.strictSession) {
-            this.remove();
-        } else {
-            this.connectionTimeout = setTimeout(() => {
-                this.remove();
-            }, Client.CONNECTION_TIMEOUT);
-        }
+    public get disconnected(): boolean {
+        return this.connectionTimeout !== null;
     }
 
-    public isDisconnected(): boolean {
-        return this.connectionTimeout !== null;
+    public markDisconnected(): void {
+        if (this.settings.strictSession) {
+            clients.remove(this);
+        } else {
+            this.connectionTimeout = setTimeout(
+                () => clients.remove(this),
+                Client.CONNECTION_TIMEOUT
+            );
+        }
     }
 
     public createSession(): boolean {
@@ -97,19 +98,6 @@ export class Client {
 
         log('Cannot reconnect because the client is already connected.', LogLevel.ERROR);
         return false;
-    }
-
-    public remove(): void {
-
-        // Cancel all downloads
-        const pendingDownloads = downloads.byClient(this);
-        for (const download of pendingDownloads) {
-            download.cancel();
-        }
-
-        // Remove client
-        clients.remove(this);
-        log(`Client disconnected; Remaining: ${clients.amount}; Downloads cancelled: ${pendingDownloads.length}`);
     }
 
     public acceptFiles(incomingFiles: Array<IncomingFiles>): void {

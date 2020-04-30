@@ -1,6 +1,8 @@
-import * as WebSocket from 'ws';
-import {HostedFile}   from '../types';
-import {Client}       from './Client';
+import * as WebSocket  from 'ws';
+import {log, LogLevel} from '../logging';
+import {HostedFile}    from '../types';
+import {Client}        from './Client';
+import {downloads}     from './downloads';
 
 export const clients = new class {
     private readonly list: Set<Client> = new Set();
@@ -14,7 +16,15 @@ export const clients = new class {
     }
 
     public remove(client: Client): void {
+
+        // Cancel all downloads
+        const pendingDownloads = downloads.byClient(client);
+        for (const download of pendingDownloads) {
+            download.cancel();
+        }
+
         this.list.delete(client);
+        log(`Client Removed; Remaining: ${this.amount}; Downloads cancelled: ${pendingDownloads.length}`, LogLevel.SILLY);
     }
 
     public resolveFile(id: string | unknown): [Client, HostedFile] | null {

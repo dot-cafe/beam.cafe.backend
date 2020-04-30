@@ -1,8 +1,8 @@
 import * as WebSocket  from 'ws';
+import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
 import {clients}       from '../store/clients';
 import {downloads}     from '../store/downloads';
-import {log, LogLevel} from '../logging';
 import {handleRequest} from './request';
 
 /* eslint-disable no-console */
@@ -39,7 +39,7 @@ export const acceptClient = (ws: WebSocket): void => {
                     if (oldClient) {
 
                         // Remove current client and use new one
-                        client.remove();
+                        clients.remove(client);
                         client = oldClient;
                     } else {
 
@@ -75,6 +75,6 @@ export const acceptClient = (ws: WebSocket): void => {
     });
 
     ws.on('close', () => {
-        client.disconnected();
+        client.markDisconnected();
     });
 };
