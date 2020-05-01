@@ -1,11 +1,11 @@
-import ejs                                                                         from 'ejs';
-import {Router}                                                                    from 'express';
-import prettyBytes                                                                 from 'pretty-bytes';
-import {TEMPLATE_DOWNLOAD, TEMPLATE_DOWNLOAD_NOT_FOUND, TEMPLATE_DOWNLOAD_OFFLINE} from '../constants';
-import {clients}                                                                   from '../store/clients';
-import {Download}                                                                  from '../store/Download';
-import {downloads}                                                                 from '../store/downloads';
-import {minifyHtml}                                                                from '../utils/minify-html';
+import ejs          from 'ejs';
+import {Router}     from 'express';
+import prettyBytes  from 'pretty-bytes';
+import {TEMPLATES}  from '../constants';
+import {clients}    from '../store/clients';
+import {Download}   from '../store/Download';
+import {downloads}  from '../store/downloads';
+import {minifyHtml} from '../utils/minify-html';
 
 export const api = (): Router => {
     const router = Router();
@@ -51,12 +51,12 @@ export const api = (): Router => {
             return;
         }
 
-        res.sendStatus(400);
+        res.sendStatus(404);
     });
 
     router.get('/d/:id', (req, res) => {
         const resolved = clients.resolveFile(req.params.id);
-        let template = TEMPLATE_DOWNLOAD_NOT_FOUND;
+        let template = TEMPLATES.DOWNLOAD_NOT_FOUND;
         let file: unknown = null;
 
         if (resolved) {
@@ -64,9 +64,9 @@ export const api = (): Router => {
 
             // Change template if user is offline
             if (user.disconnected) {
-                template = TEMPLATE_DOWNLOAD_OFFLINE;
+                template = TEMPLATES.DOWNLOAD_OFFLINE;
             } else {
-                template = TEMPLATE_DOWNLOAD;
+                template = TEMPLATES.DOWNLOAD;
                 file = resolvedFile;
             }
         }
