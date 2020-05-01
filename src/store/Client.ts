@@ -15,15 +15,18 @@ type IncomingFiles = {
 }
 
 type Settings = {
+    reusableDownloadKeys: boolean;
     strictSession: boolean;
 }
 
 export const ClientSettings = Joi.object({
+    reusableDownloadKeys: Joi.boolean().optional(),
     strictSession: Joi.boolean().optional()
 });
 
 export class Client {
     public static readonly DEFAULT_SETTINGS: Settings = {
+        reusableDownloadKeys: true,
         strictSession: false
     };
 
@@ -134,11 +137,23 @@ export class Client {
         fileId: string,
         downloadId: string
     ): void {
-        if (this.files.some(value => value.id === fileId)) {
+        const file = this.files.find(value => value.id === fileId);
+
+        if (file) {
+
             this.sendMessage('file-request', {
-                downloadId,
-                fileId
+                downloadId, fileId
             });
+
+            // Refresh key of this file
+            if (!this.settings.reusableDownloadKeys) {
+                file.id = uid();
+
+                this.sendMessage('file-registrations', [{
+                    id: file.id,
+                    name: file.name
+                }]);
+            }
         } else {
             log('Requested file does not exist any longer', LogLevel.INFO);
         }
