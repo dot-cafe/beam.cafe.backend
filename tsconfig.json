@@ -5,7 +5,7 @@
         "esModuleInterop": true,
         "noImplicitAny": false,
         "module": "commonjs",
-        "target": "es6",
+        "target": "ES2020",
         "strict": true,
         "outDir": "dist"
     },
