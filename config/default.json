@@ -1,0 +1,23 @@
+{
+    "server": {
+        "port": 8080,
+        "api": "/"
+    },
+    "security": {
+        "downloadKeySize": 64,
+        "downloadKeyMaxAge": 60000,
+        "clientWebSocketConnectionTimeout": 900000,
+        "clientWebSocketSessionKeySize": 64
+    },
+    "logs": {
+        "logUserAgent": true,
+        "logLevels": [
+            "ERROR",
+            "WARNING",
+            "INFO",
+            "VERBOSE",
+            "DEBUG",
+            "SILLY"
+        ]
+    }
+}

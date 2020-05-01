@@ -1,4 +1,5 @@
 import {Request, Response}        from 'express';
+import {config}                   from '../config';
 import {log, LogLevel}            from '../logging';
 import {uid}                      from '../utils/uid';
 import {Client}                   from './Client';
@@ -16,10 +17,7 @@ export const downloads = new class {
      * For each download a special url will be made to block further
      * download attempts by the browser in case the user cancelled the download.
      * These are only valid for 1 minute.
-     *
-     * TODO: Create env files with constants?
      */
-    private readonly REDIRECT_TIMEOUT = 1000 * 60;
     private readonly redirects: Map<string, DownloadRedirect> = new Map();
 
     public get amount(): number {
@@ -60,7 +58,7 @@ export const downloads = new class {
             fileId,
             timeout: setTimeout(() => {
                 this.redirects.delete(downloadId);
-            }, this.REDIRECT_TIMEOUT) as unknown as number
+            }, config.security.downloadKeyMaxAge) as unknown as number
         });
 
         return downloadId;

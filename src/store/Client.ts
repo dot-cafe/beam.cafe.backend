@@ -1,6 +1,7 @@
 import Joi                from '@hapi/joi';
 import {Request}          from 'express';
 import * as WebSocket     from 'ws';
+import {config}           from '../config';
 import {log, LogLevel}    from '../logging';
 import {HostedFile}       from '../types';
 import {decryptUserAgent} from '../utils/decrypt-user-agent';
@@ -22,8 +23,6 @@ export const ClientSettings = Joi.object({
 });
 
 export class Client {
-    public static readonly CONNECTION_TIMEOUT = 1000 * 60 * 15; // 15 Minutes
-    public static readonly SESSION_KEY_SIZE = 64;
     public static readonly DEFAULT_SETTINGS: Settings = {
         strictSession: false
     };
@@ -43,7 +42,9 @@ export class Client {
         this.connectionTimeout = null;
         this.settings = {...Client.DEFAULT_SETTINGS};
         const userAgent = req.headers['user-agent'];
-        const info = userAgent ? decryptUserAgent(userAgent) : 'unknown';
+        const info = config.logs.logUserAgent ?
+            userAgent ? decryptUserAgent(userAgent) : 'unknown' :
+            '[HIDDEN]';
 
         clients.add(this);
         log(`New client; Connected: ${clients.amount}; UA: ${info}`, LogLevel.SILLY);
@@ -59,14 +60,14 @@ export class Client {
         } else {
             this.connectionTimeout = setTimeout(
                 () => clients.remove(this),
-                Client.CONNECTION_TIMEOUT
+                config.security.clientWebSocketConnectionTimeout
             );
         }
     }
 
     public createSession(): boolean {
         if (this.sessionKey === null) {
-            this.sessionKey = uid(Client.SESSION_KEY_SIZE);
+            this.sessionKey = uid(config.security.clientWebSocketSessionKeySize);
             this.sendMessage('new-session', this.sessionKey);
 
             return true;
@@ -87,7 +88,7 @@ export class Client {
 
             // Reset timeout and create new session-key
             this.connectionTimeout = null;
-            this.sessionKey = uid(Client.SESSION_KEY_SIZE);
+            this.sessionKey = uid(config.security.clientWebSocketSessionKeySize);
 
             this.sendMessage('restore-session', {
                 key: this.sessionKey,
@@ -120,7 +121,6 @@ export class Client {
                 log('Invalid incoming-file', LogLevel.ERROR);
             }
         }
-
 
         this.sendMessage('file-registrations', files.map(value => ({
             id: value.id,

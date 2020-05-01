@@ -2,6 +2,7 @@ import cors             from 'cors';
 import express          from 'express';
 import http             from 'http';
 import {api}            from './api';
+import {config}         from './config';
 import {log}            from './logging';
 import {wrapHTTPServer} from './socket';
 
@@ -21,13 +22,13 @@ import {wrapHTTPServer} from './socket';
     }
 
     // Register api
-    app.use('/', api());
+    app.use(config.server.api, api());
     log('API attached...');
 
     wrapHTTPServer(server);
     server.on('request', app);
     log('WebSocket server attached...');
 
-    server.listen(8080);
+    server.listen(config.server.port);
     log('App successfully launched');
 })();

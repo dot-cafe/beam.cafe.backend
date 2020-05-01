@@ -1,6 +1,7 @@
 import * as fs       from 'fs';
 import {WriteStream} from 'fs';
 import * as path     from 'path';
+import {config}      from '../config';
 
 const LOG_FILE_STREAM_OPTIONS = {flags: 'a'};
 const LOG_DIRECTORY = path.resolve('./.logs');
@@ -27,10 +28,15 @@ for (const [level] of Object.entries(LogLevel)) {
     logStreams.set(level as LogLevel, stream);
 }
 
+const levels = config.logs.logLevels;
 export const log = (
     msg: string,
     level = LogLevel.SILLY
 ): void => {
+    if (!levels.includes(level)) {
+        return;
+    }
+
     const date = (new Date()).toLocaleString();
     const logString = `[${level}] (${date}): ${msg}\n`;
     const logger = logStreams.get(level) as WriteStream;
