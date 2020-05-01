@@ -1,11 +1,9 @@
-import ejs          from 'ejs';
-import {Router}     from 'express';
-import prettyBytes  from 'pretty-bytes';
-import {TEMPLATES}  from '../constants';
-import {clients}    from '../store/clients';
-import {Download}   from '../store/Download';
-import {downloads}  from '../store/downloads';
-import {minifyHtml} from '../utils/minify-html';
+import {Router}    from 'express';
+import {TEMPLATES} from '../constants';
+import {clients}   from '../store/clients';
+import {Download}  from '../store/Download';
+import {downloads} from '../store/downloads';
+import {renderEJS} from '../utils/render-ejs';
 
 export const api = (): Router => {
     const router = Router();
@@ -36,22 +34,18 @@ export const api = (): Router => {
                     // Start download
                     const [client, file] = resolved;
                     new Download(res, client, file);
-                } else {
-
-                    // Resource is gone, reduced to atoms
-                    res.sendStatus(410);
+                    return;
                 }
             } else {
 
                 // Create new, unique download-key and redirect client
                 const key = downloads.createDownloadKey(id);
                 res.redirect(303, `/file/${id}/${key}`);
+                return;
             }
-
-            return;
         }
 
-        res.sendStatus(404);
+        renderEJS(TEMPLATES.DOWNLOAD_GONE, res);
     });
 
     router.get('/d/:id', (req, res) => {
@@ -71,15 +65,7 @@ export const api = (): Router => {
             }
         }
 
-        ejs.renderFile(template, {
-            prettyBytes, file
-        }, {}, (err, str) => {
-            if (err) {
-                res.sendStatus(500);
-            } else {
-                res.send(minifyHtml(str));
-            }
-        });
+        renderEJS(template, res, {file});
     });
 
     return router;
