@@ -1,10 +1,26 @@
 import {Request, Response}        from 'express';
 import {log, LogLevel}            from '../logging';
+import {uid}                      from '../utils/uid';
 import {Client}                   from './Client';
 import {Download, DownloadStatus} from './Download';
 
+type DownloadRedirect = {
+    timeout: number;
+    fileId: string;
+}
+
 export const downloads = new class {
     private readonly list: Set<Download> = new Set();
+
+    /**
+     * For each download a special url will be made to block further
+     * download attempts by the browser in case the user cancelled the download.
+     * These are only valid for 1 minute.
+     *
+     * TODO: Create env files with constants?
+     */
+    private readonly REDIRECT_TIMEOUT = 1000 * 60;
+    private readonly redirects: Map<string, DownloadRedirect> = new Map();
 
     public get amount(): number {
         return this.list.size;
@@ -35,6 +51,31 @@ export const downloads = new class {
 
     public byFileId(id: string): Array<Download> {
         return [...this.list].filter(value => value.file.id === id);
+    }
+
+    public createDownloadKey(fileId: string): string {
+        const downloadId = uid(64);
+
+        this.redirects.set(downloadId, {
+            fileId,
+            timeout: setTimeout(() => {
+                this.redirects.delete(downloadId);
+            }, this.REDIRECT_TIMEOUT) as unknown as number
+        });
+
+        return downloadId;
+    }
+
+    public removeDownloadKey(downloadId: string): boolean {
+        const item = this.redirects.get(downloadId);
+
+        if (!item) {
+            return false;
+        }
+
+        clearTimeout(item.timeout);
+        this.redirects.delete(downloadId);
+        return true;
     }
 
     public acceptUpload(

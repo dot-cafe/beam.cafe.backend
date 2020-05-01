@@ -20,12 +20,34 @@ export const api = (): Router => {
         res.sendStatus(400);
     });
 
-    router.get('/file/:id', (req, res) => {
-        const resolved = clients.resolveFile(req.params.id);
+    router.get('/file/:id/:hash?', (req, res) => {
+        const {id, hash} = req.params;
+        const resolved = clients.resolveFile(id);
 
         // Validate provider
         if (resolved) {
-            new Download(res, resolved[0], resolved[1]);
+
+            // Check if download-hash is present
+            if (hash) {
+
+                // Check if reservation can be removed
+                if (downloads.removeDownloadKey(hash)) {
+
+                    // Start download
+                    const [client, file] = resolved;
+                    new Download(res, client, file);
+                } else {
+
+                    // Resource is gone, reduced to atoms
+                    res.sendStatus(410);
+                }
+            } else {
+
+                // Create new, unique download-key and redirect client
+                const key = downloads.createDownloadKey(id);
+                res.redirect(303, `/file/${id}/${key}`);
+            }
+
             return;
         }
 
