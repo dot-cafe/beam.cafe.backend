@@ -5,6 +5,7 @@ import {clients}       from '../store/clients';
 import {downloads}     from '../store/downloads';
 import {handleRequest} from './request';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function handleAction(
     client: Client,
     data: any,

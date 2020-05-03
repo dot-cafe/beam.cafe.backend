@@ -2,11 +2,7 @@ import {Request}       from 'express';
 import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
-import {clients}       from '../store/clients';
-import {downloads}     from '../store/downloads';
 import {handleAction}  from './action';
-import {handleRequest} from './request';
-
 
 /* eslint-disable no-console */
 export const acceptClient = (ws: WebSocket, req: Request): void => {

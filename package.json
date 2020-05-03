@@ -7,11 +7,13 @@
     "keywords": [],
     "main": "src/app.ts",
     "scripts": {
-        "build": "tsc && cp -r html dist/html",
+        "build": "tsc --project tsconfig.json",
         "start": "tsc && node dist/app.js",
         "dev": "ts-node-dev --respawn --transpileOnly src/app.ts",
-        "lint": "eslint src/**/*.{js,ts}",
-        "lint:fix": "eslint src/**/*.{js,ts} --fix"
+        "lint:ts": "eslint src/**/*.{js,ts,tsx}",
+        "lint:ts:fix": "eslint src/**/*.{js,ts,tsx} --fix",
+        "lint:types": "tsc --project tsconfig.json --noEmit",
+        "lint:fix": "npm run lint:ts:fix && npm run lint:types"
     },
     "devDependencies": {
         "@types/cors": "^2.8.6",
