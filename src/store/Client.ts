@@ -72,7 +72,6 @@ export class Client {
         if (this.sessionKey === null) {
             this.sessionKey = uid(config.security.clientWebSocketSessionKeySize);
             this.sendMessage('new-session', this.sessionKey);
-
             return true;
         }
 
@@ -95,6 +94,7 @@ export class Client {
 
             this.sendMessage('restore-session', {
                 key: this.sessionKey,
+                settings: this.settings,
                 files: this.files.map(value => ({
                     name: value.name,
                     id: value.id
