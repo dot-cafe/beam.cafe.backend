@@ -18,17 +18,9 @@ export enum DownloadStatus {
 }
 
 export class Download {
-
-    // Download ID
     public readonly id: string;
-
-    // The file
     public readonly file: HostedFile;
-
-    // The uploader / source
     public readonly provider: Client;
-
-    // The downloader's response
     private readonly downloaderResponse: Response;
 
     // Download status
@@ -58,7 +50,6 @@ export class Download {
         // Add to downloads and initiate transfer
         downloads.add(this);
         fileProvider.requestFile(file.id, this.id);
-        log('Download started', LogLevel.SILLY);
     }
 
     public cancel(): void {
@@ -67,7 +58,6 @@ export class Download {
 
             // This raises a network-error on the client, end would lead to an incomplete file.
             this.downloaderResponse.destroy();
-            log('Download cancelled.', LogLevel.SILLY);
         }
 
         this.status = DownloadStatus.Cancelled;
@@ -79,7 +69,12 @@ export class Download {
         uploaderResponse: Response
     ): void {
         if (this.status !== DownloadStatus.Pending) {
-            log('Upload rejected because the download is not in a pending state.', LogLevel.ERROR);
+            log('upload-failed', {
+                reason: 'Upload rejected because the download is not in a pending state.',
+                downloadId: this.id,
+                fileId: this.file.id,
+                userId: this.provider.id
+            }, LogLevel.ERROR);
             return;
         }
 

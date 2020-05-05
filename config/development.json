@@ -1,1 +1,5 @@
-{}
+{
+    "server": {
+        "internalIdSize": 8
+    }
+}

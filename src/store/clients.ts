@@ -23,8 +23,11 @@ export const clients = new class {
             download.cancel();
         }
 
+        log('destroy-session', {
+            userId: client.id
+        }, LogLevel.DEBUG);
+
         this.list.delete(client);
-        log(`Client Removed; Remaining: ${this.amount}; Downloads cancelled: ${pendingDownloads.length}`, LogLevel.SILLY);
     }
 
     public resolveFile(id: string | unknown): [Client, HostedFile] | null {

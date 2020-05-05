@@ -26,27 +26,32 @@ export class Client {
         strictSession: false
     };
 
+    public readonly id: string;
     public readonly files: Array<HostedFile>;
     public readonly settings: Settings;
+    public readonly userAgent: string;
     public socket: WebSocket;
     public sessionKey: string | null;
 
     // Timeout for this client to get removed after a disconnection
     private connectionTimeout: NodeJS.Timeout | null;
+    private timeoutTimestamp = 0;
 
     constructor(socket: WebSocket, req: Request) {
+        this.id = uid(config.server.internalIdSize);
         this.files = [];
         this.socket = socket;
         this.sessionKey = null;
         this.connectionTimeout = null;
+        this.timeoutTimestamp = 0;
         this.settings = {...Client.DEFAULT_SETTINGS};
-        const userAgent = req.headers['user-agent'];
-        const info = config.logs.logUserAgent ?
-            userAgent ? decryptUserAgent(userAgent) : 'unknown' :
-            '[HIDDEN]';
+
+        const uaHeader = req.headers['user-agent'];
+        this.userAgent = config.logs.logUserAgent ?
+            uaHeader ? decryptUserAgent(uaHeader) : 'unknown'
+            : 'hidden';
 
         clients.add(this);
-        log(`New client; Connected: ${clients.amount}; UA: ${info}`, LogLevel.SILLY);
     }
 
     public get disconnected(): boolean {
@@ -68,10 +73,19 @@ export class Client {
         if (this.sessionKey === null) {
             this.sessionKey = uid(config.security.clientWebSocketSessionKeySize);
             this.sendMessage('new-session', this.sessionKey);
+
+            log('create-session', {
+                userId: this.id,
+                userAgent: this.userAgent
+            }, LogLevel.DEBUG);
+
             return true;
         }
 
-        log('User does already have an active session.', LogLevel.ERROR);
+        log('create-session-failed', {
+            userId: this.id,
+            reason: 'User does already have an active session.'
+        }, LogLevel.WARNING);
         return false;
     }
 
@@ -97,10 +111,17 @@ export class Client {
                 }))
             });
 
+            log('restore-session', {
+                userId: this.id
+            }, LogLevel.DEBUG);
+
             return true;
         }
 
-        log('Cannot reconnect because the client is already connected.', LogLevel.ERROR);
+        log('restore-session-failed', {
+            userId: this.id,
+            reason: 'Session is already active.'
+        }, LogLevel.WARNING);
         return false;
     }
 
@@ -141,7 +162,6 @@ export class Client {
         const file = this.files.find(value => value.id === fileId);
 
         if (file) {
-
             this.sendMessage('file-request', {
                 downloadId, fileId
             });
@@ -155,8 +175,19 @@ export class Client {
                     name: file.name
                 }]);
             }
+
+            log('request-upload', {
+                userId: this.id,
+                downloadId,
+                fileId
+            }, LogLevel.DEBUG);
         } else {
-            log('Requested file does not exist any longer', LogLevel.INFO);
+            log('request-upload-failed', {
+                reason: 'Requested file does not exist any longer',
+                userId: this.id,
+                downloadId,
+                fileId
+            }, LogLevel.WARNING);
         }
     }
 
@@ -173,10 +204,11 @@ export class Client {
             for (const download of active) {
                 download.cancel();
             }
-
-            log(`File removed; ${active.length} downloads cancelled`);
         } else {
-            log('Cannot remove file because it does not exist', LogLevel.WARNING);
+            log('remove-file-failed', {
+                reason: 'Cannot remove file because it does not exist',
+                userId: this.id
+            }, LogLevel.WARNING);
         }
     }
 
@@ -209,6 +241,21 @@ export class Client {
         }
 
         return false;
+    }
+
+    public applySettings(settings: unknown): boolean {
+        if (!ClientSettings.validate(settings)) {
+            log('invalid-payload', {
+                location: 'settings'
+            }, LogLevel.ERROR);
+            return false;
+        }
+
+        for (const [key, value] of Object.entries(settings as object)) {
+            this.applySetting(key as any, value);
+        }
+
+        return true;
     }
 
     public sendMessage(type: string, payload: unknown = null): void {

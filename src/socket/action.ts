@@ -17,20 +17,14 @@ export function handleAction(
 
     const {type, payload} = data as any;
     if (typeof type !== 'string') {
-        log('Invalid action type', LogLevel.ERROR);
+        log('invalid-payload', {
+            location: 'ws'
+        }, LogLevel.ERROR);
         return;
     }
 
     switch (type) {
         case 'request': {
-            if (
-                typeof payload.id !== 'string' ||
-                typeof payload.type !== 'string'
-            ) {
-                log('Invalid websocket request', LogLevel.ERROR);
-                break;
-            }
-
             handleRequest(client, payload);
             break;
         }
@@ -80,7 +74,10 @@ export function handleAction(
             break;
         }
         default: {
-            log(`Unknown ws-request: ${type}`, LogLevel.WARNING);
+            log('invalid-payload', {
+                location: 'ws-action',
+                action: type
+            }, LogLevel.ERROR);
         }
     }
 }

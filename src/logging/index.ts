@@ -2,49 +2,64 @@ import * as fs       from 'fs';
 import {WriteStream} from 'fs';
 import * as path     from 'path';
 import {config}      from '../config';
+import {uid}         from '../utils/uid';
+import {Events}      from './events';
 
 const LOG_FILE_STREAM_OPTIONS = {flags: 'a'};
 const LOG_DIRECTORY = path.resolve('./.logs');
-const CENTRALIZED_LOGS = path.join(LOG_DIRECTORY, 'all.log');
+const CENTRALIZED_LOGS = path.join(LOG_DIRECTORY, 'all.json');
 if (!fs.existsSync(LOG_DIRECTORY)) {
     fs.mkdirSync(LOG_DIRECTORY, {recursive: true});
 }
 
 export enum LogLevel {
+    FATAL = 'FATAL',
     ERROR = 'ERROR',
     WARNING = 'WARNING',
     INFO = 'INFO',
-    VERBOSE = 'VERBOSE',
-    DEBUG = 'DEBUG',
-    SILLY = 'SILLY'
+    DEBUG = 'DEBUG'
 }
 
 const logStreams = new Map<LogLevel, WriteStream>();
 const all = fs.createWriteStream(CENTRALIZED_LOGS, LOG_FILE_STREAM_OPTIONS);
 
 for (const [level] of Object.entries(LogLevel)) {
-    const logFile = path.resolve(LOG_DIRECTORY, `${level.toLowerCase()}.log`);
+    const logFile = path.resolve(LOG_DIRECTORY, `${level.toLowerCase()}.json`);
     const stream = fs.createWriteStream(logFile, LOG_FILE_STREAM_OPTIONS);
     logStreams.set(level as LogLevel, stream);
 }
 
 const levels = config.logs.logLevels;
-export const log = (
-    msg: string,
-    level = LogLevel.SILLY
+export const log = <T extends keyof Events>(
+    t: T, p: Events[T],
+    level: LogLevel
 ): void => {
     if (!levels.includes(level)) {
-        return;
+        level = LogLevel.ERROR;
     }
 
-    const date = (new Date()).toLocaleString();
-    const logString = `[${level}] (${date}): ${msg}\n`;
+    const logMessage = `${JSON.stringify({
+        timestamp: Date.now(),
+        eventId: uid(config.server.internalIdSize),
+        eventType: t,
+        ...p
+    })}\n`;
+
     const logger = logStreams.get(level) as WriteStream;
-    logger.write(logString);
-    all.write(logString);
+    logger.write(logMessage);
+    all.write(logMessage);
 
     if (process.env.NODE_ENV === 'development') {
-        process.stdout.write(logString);
+        let msg = `${t} {`;
+
+        for (const [key, val] of Object.entries(p)) {
+            if (key !== 'type') {
+                msg += `${key}: "${val}", `;
+            }
+        }
+
+        process.stdout.write(`${msg.slice(0, -2)}}`);
+        process.stdout.write('\n');
     }
 };
 
@@ -57,7 +72,10 @@ const handleForcedExit = (type: string, extra: unknown): void => {
         additionalInformation = `\n${extra}`;
     }
 
-    log(`Process exit: ${type + additionalInformation}`, LogLevel.ERROR);
+    log('process-exit', {
+        cause: type,
+        reason: additionalInformation
+    }, LogLevel.FATAL);
 };
 
 process.on('exit', handleForcedExit.bind(null, 'exit'));

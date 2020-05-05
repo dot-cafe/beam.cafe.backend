@@ -8,6 +8,7 @@ type Config = {
     server: {
         port: number;
         api: string;
+        internalIdSize: number;
     };
 
     security: {
@@ -26,8 +27,8 @@ type Config = {
 export const config = deepmerge(
     defaultConfig,
     process.env.NODE_ENV === 'development' ?
-        developmentConfig :
-        productionConfig,
+        (developmentConfig as Config) :
+        (productionConfig as Config),
     {
         arrayMerge(destinationArray, sourceArray) {
             return sourceArray;

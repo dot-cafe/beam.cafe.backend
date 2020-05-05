@@ -1,33 +1,29 @@
-import {Client, ClientSettings} from '../store/Client';
-import {log, LogLevel}          from '../logging';
-
-export type WSRequest = {
-    data: unknown;
-    type: string;
-    id: string;
-}
+import {log, LogLevel} from '../logging';
+import {Client}        from '../store/Client';
+import {typeOf}        from '../utils/type-of';
 
 const respondTo = (client: Client, id: string, ok: boolean, data: unknown = null): void =>
     client.sendMessage('response', {id, ok, data});
 
 export function handleRequest(
     client: Client,
-    request: WSRequest
+    request: unknown
 ): void {
-    const {id, data, type} = request;
+    if (
+        typeOf(request) !== 'object' ||
+        typeof (request as any).id !== 'string' ||
+        typeof (request as any).type !== 'string'
+    ) {
+        log('invalid-payload', {
+            location: 'ws'
+        }, LogLevel.ERROR);
+        return;
+    }
 
+    const {id, data, type} = request as any;
     switch (type) {
         case 'settings': {
-            if (!ClientSettings.validate(data)) {
-                log('Cannot sync settings: data is invalid', LogLevel.ERROR);
-                break;
-            }
-
-            for (const [key, value] of Object.entries(data as object)) {
-                client.applySetting(key as any, value);
-            }
-
-            respondTo(client, id, true);
+            respondTo(client, id, client.applySettings(data));
             break;
         }
         case 'reset-keys': {
@@ -37,7 +33,12 @@ export function handleRequest(
         }
         default: {
             respondTo(client, id, false);
-            log(`Unknown websockt request: ${type}`, LogLevel.ERROR);
+
+            log('invalid-payload', {
+                location: 'ws-request',
+                action: type
+            }, LogLevel.ERROR);
+
             break;
         }
     }

@@ -3,7 +3,7 @@ import express          from 'express';
 import http             from 'http';
 import {api}            from './api';
 import {config}         from './config';
-import {log}            from './logging';
+import {log, LogLevel}  from './logging';
 import {wrapHTTPServer} from './socket';
 
 (async (): Promise<void> => {
@@ -15,20 +15,24 @@ import {wrapHTTPServer} from './socket';
 
     // Enable cors during development
     if (process.env.NODE_ENV === 'development') {
-        log('Starting app in development mode...');
+        log('booting', {
+            message: 'Starting app in development'
+        }, LogLevel.INFO);
+
         app.use(cors());
     } else {
-        log('Starting app in production...');
+        log('booting', {
+            message: 'Starting app in production'
+        }, LogLevel.INFO);
     }
 
     // Register api
     app.use(config.server.api, api());
-    log('API attached...');
-
     wrapHTTPServer(server);
     server.on('request', app);
-    log('WebSocket server attached...');
-
     server.listen(config.server.port);
-    log('App successfully launched');
+
+    log('booting', {
+        message: 'Server successfully started launched.'
+    }, LogLevel.INFO);
 })();

@@ -1,7 +1,8 @@
 {
     "server": {
         "port": 8080,
-        "api": "/"
+        "api": "/",
+        "internalIdSize": 32
     },
     "security": {
         "downloadKeySize": 64,
@@ -12,12 +13,11 @@
     "logs": {
         "logUserAgent": true,
         "logLevels": [
+            "FATAL",
             "ERROR",
             "WARNING",
             "INFO",
-            "VERBOSE",
-            "DEBUG",
-            "SILLY"
+            "DEBUG"
         ]
     }
 }

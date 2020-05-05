@@ -30,7 +30,6 @@ export const downloads = new class {
 
     public remove(download: Download): void {
         this.list.delete(download);
-        log(`Download removed; Remaining: ${downloads.amount}`, LogLevel.SILLY);
     }
 
     public byId(id: string): Download | null {
@@ -84,10 +83,16 @@ export const downloads = new class {
         const download = this.byId(downloadId);
 
         if (!download) {
-            log(`Invalid download; Download ID: ${downloadId}`, LogLevel.VERBOSE);
+            log('accept-upload-failed', {
+                reason: 'Download not found.',
+                downloadId
+            }, LogLevel.INFO);
             return false;
         } else if (download.status !== DownloadStatus.Pending) {
-            log('Upload is already active', LogLevel.ERROR);
+            log('accept-upload-failed', {
+                reason: 'Upload already active.',
+                downloadId
+            }, LogLevel.INFO);
             return false;
         }
 
@@ -106,7 +111,10 @@ export const downloads = new class {
             return true;
         }
 
-        log(`Cannot find download to cancel; Download ID: ${downloadId}`, LogLevel.VERBOSE);
+        log('cancel-upload-failed', {
+            reason: 'Cannot find download.',
+            downloadId
+        }, LogLevel.WARNING);
         return false;
     }
 };

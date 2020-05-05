@@ -19,7 +19,9 @@ export const acceptClient = (ws: WebSocket, req: Request): void => {
         try {
             handleAction(client, JSON.parse(message), ws);
         } catch (e) {
-            log(`Failed to parse websocket request: ${e.message}`, LogLevel.ERROR);
+            log('invalid-payload', {
+                location: 'ws'
+            }, LogLevel.ERROR);
         }
     });
 
