@@ -43,7 +43,7 @@ export const clients = new class {
         return null;
     }
 
-    public restoreSession(key: string | unknown, newSocket: WebSocket): Client | null {
+    public restoreSession(key: unknown, newSocket: WebSocket): Client | null {
         if (typeof key !== 'string') {
             return null;
         }

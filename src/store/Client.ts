@@ -5,14 +5,10 @@ import {config}           from '../config';
 import {log, LogLevel}    from '../logging';
 import {HostedFile}       from '../types';
 import {decryptUserAgent} from '../utils/decrypt-user-agent';
+import {typeOf}           from '../utils/type-of';
 import {uid}              from '../utils/uid';
 import {clients}          from './clients';
 import {downloads}        from './downloads';
-
-type IncomingFiles = {
-    name: string | unknown;
-    size: number | unknown;
-}
 
 type Settings = {
     reusableDownloadKeys: boolean;
@@ -108,20 +104,25 @@ export class Client {
         return false;
     }
 
-    public acceptFiles(incomingFiles: Array<IncomingFiles>): void {
+    public acceptFiles(incomingFiles: unknown): void {
         const files: Array<HostedFile> = [];
 
+        if (!Array.isArray(incomingFiles)) {
+            return;
+        }
+
         for (const file of incomingFiles) {
-            if (typeof file.name === 'string' &&
-                typeof file.size === 'number') {
+            if (
+                typeOf(file) === 'object' &&
+                typeof file.name === 'string' &&
+                typeof file.size === 'number'
+            ) {
 
                 files.push({
                     id: uid(),
                     name: file.name,
                     size: file.size
                 });
-            } else {
-                log('Invalid incoming-file', LogLevel.ERROR);
             }
         }
 
@@ -161,7 +162,6 @@ export class Client {
 
     public removeFile(id: string | unknown): void {
         if (typeof id !== 'string') {
-            log(`Cannot remove file: invalid payload of type: ${typeof id}`, LogLevel.ERROR);
             return;
         }
 

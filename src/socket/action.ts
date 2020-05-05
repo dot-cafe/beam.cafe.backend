@@ -3,16 +3,19 @@ import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
 import {clients}       from '../store/clients';
 import {downloads}     from '../store/downloads';
+import {typeOf}        from '../utils/type-of';
 import {handleRequest} from './request';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export function handleAction(
     client: Client,
-    data: any,
+    data: unknown,
     ws: WebSocket
 ): void {
-    const {type, payload} = data;
+    if (typeOf(data) !== 'object') {
+        return;
+    }
 
+    const {type, payload} = data as any;
     if (typeof type !== 'string') {
         log('Invalid action type', LogLevel.ERROR);
         return;
@@ -64,8 +67,9 @@ export function handleAction(
             break;
         }
         case 'bulk': {
+
+            // Validate payload
             if (!Array.isArray(payload)) {
-                log('Bulk-payload must be an array', LogLevel.ERROR);
                 break;
             }
 

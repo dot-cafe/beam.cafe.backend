@@ -95,9 +95,12 @@ export const downloads = new class {
         return true;
     }
 
-    public cancelUpload(downloadId: string): boolean {
-        const download = this.byId(downloadId);
+    public cancelUpload(downloadId: unknown): boolean {
+        if (typeof downloadId !== 'string') {
+            return false;
+        }
 
+        const download = this.byId(downloadId);
         if (download) {
             download.cancel();
             return true;

@@ -23,7 +23,6 @@ export function handleRequest(
                 break;
             }
 
-            /* eslint-disable @typescript-eslint/no-explicit-any */
             for (const [key, value] of Object.entries(data as object)) {
                 client.applySetting(key as any, value);
             }
