@@ -23,20 +23,29 @@ export enum LogLevel {
 const logStreams = new Map<LogLevel, WriteStream>();
 const all = fs.createWriteStream(CENTRALIZED_LOGS, LOG_FILE_STREAM_OPTIONS);
 
+// Create log-files and corresponding streams
+const logLevels = config.logs.logLevels;
 for (const [level] of Object.entries(LogLevel)) {
-    const logFile = path.resolve(LOG_DIRECTORY, `${level.toLowerCase()}.json`);
-    const stream = fs.createWriteStream(logFile, LOG_FILE_STREAM_OPTIONS);
-    logStreams.set(level as LogLevel, stream);
+    if (logLevels.includes(level as LogLevel)) {
+        const logFile = path.resolve(LOG_DIRECTORY, `${level.toLowerCase()}.json`);
+        const stream = fs.createWriteStream(logFile, LOG_FILE_STREAM_OPTIONS);
+        logStreams.set(level as LogLevel, stream);
+    }
 }
 
-const levels = config.logs.logLevels;
+/**
+ * Logs something
+ * @param t Event-name
+ * @param p Event properties
+ * @param level Log-level
+ */
 export const log = <T extends keyof Events>(
     t: T, p: Events[T],
     level: LogLevel
 ): void => {
 
     // Skip ignored / invalid levels
-    if (!levels.includes(level)) {
+    if (!logLevels.includes(level)) {
         return;
     }
 
