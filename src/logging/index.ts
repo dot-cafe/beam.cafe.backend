@@ -34,11 +34,14 @@ export const log = <T extends keyof Events>(
     t: T, p: Events[T],
     level: LogLevel
 ): void => {
+
+    // Skip ignored / invalid levels
     if (!levels.includes(level)) {
-        level = LogLevel.ERROR;
+        return;
     }
 
     const logMessage = `${JSON.stringify({
+        level: level.toLowerCase(),
         timestamp: Date.now(),
         eventId: uid(config.server.internalIdSize),
         eventType: t,
