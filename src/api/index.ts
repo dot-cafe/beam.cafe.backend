@@ -52,20 +52,22 @@ export const api = (): Router => {
         const resolved = clients.resolveFile(req.params.id);
         let template = TEMPLATES.DOWNLOAD_NOT_FOUND;
         let file: unknown = null;
+        let user: unknown = null;
 
         if (resolved) {
-            const [user, resolvedFile] = resolved;
+            const [resolvedUser, resolvedFile] = resolved;
 
-            // Change template if user is offline
-            if (user.disconnected) {
+            // Change template if resolvedUser is offline
+            if (resolvedUser.disconnected) {
                 template = TEMPLATES.DOWNLOAD_OFFLINE;
             } else {
                 template = TEMPLATES.DOWNLOAD;
                 file = resolvedFile;
+                user = resolvedUser;
             }
         }
 
-        renderEJS(template, res, {file});
+        renderEJS(template, res, {user, file});
     });
 
     return router;

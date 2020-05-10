@@ -34,6 +34,12 @@
 </main>
 
 <style>
+    :root {
+        --c-primary: <%= user.settings.customization.colors[0] %>;
+        --c-background-primary: <%= user.settings.customization.colors[1] %>;
+        --c-text-primary: <%= user.settings.customization.colors[2] %>;
+    }
+
     body {
         display: flex;
         align-items: center;
@@ -67,9 +73,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        color: var(--c-text-primary);
+        opacity: 0.75;
         white-space: pre-wrap;
         margin: 0.75em 0;
-        color: var(--c-text-primary-accent);
         font-size: 0.9em;
     }
 

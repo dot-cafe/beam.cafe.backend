@@ -13,17 +13,29 @@ import {downloads}        from './downloads';
 type Settings = {
     reusableDownloadKeys: boolean;
     strictSession: boolean;
+    customization: {
+        colors: [string, string, string];
+        username: string;
+    }
 }
 
 export const ClientSettings = Joi.object({
     reusableDownloadKeys: Joi.boolean().optional(),
-    strictSession: Joi.boolean().optional()
+    strictSession: Joi.boolean().optional(),
+    customization: Joi.object().optional().keys({
+        colors: Joi.array().length(3).items(Joi.string()),
+        username: Joi.string()
+    })
 });
 
 export class Client {
     public static readonly DEFAULT_SETTINGS: Settings = {
         reusableDownloadKeys: true,
-        strictSession: false
+        strictSession: false,
+        customization: {
+            username: 'Anonymous',
+            colors: ['#3d7cf9', '#2f3136', '#fafafa']
+        }
     };
 
     public readonly id: string;
