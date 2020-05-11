@@ -1,9 +1,9 @@
 import {Router}    from 'express';
 import {TEMPLATES} from '../constants';
-import {clients}   from '../store/clients';
-import {Download}  from '../store/Download';
-import {downloads} from '../store/downloads';
-import {renderEJS} from '../utils/render-ejs';
+import {clients}      from '../store/clients';
+import {Transmission}  from '../store/Transmission';
+import {transmissions} from '../store/transmissions';
+import {renderEJS}     from '../utils/render-ejs';
 
 export const api = (): Router => {
     const router = Router();
@@ -11,7 +11,7 @@ export const api = (): Router => {
     router.post('/file/:id', (req, res) => {
 
         // Validate id
-        if (downloads.acceptUpload(req, res, req.params.id)) {
+        if (transmissions.acceptUpload(req, res, req.params.id)) {
             return;
         }
 
@@ -29,17 +29,17 @@ export const api = (): Router => {
             if (hash) {
 
                 // Check if reservation can be removed
-                if (downloads.removeDownloadKey(hash)) {
+                if (transmissions.removeDownloadKey(hash)) {
 
                     // Start download
                     const [client, file] = resolved;
-                    new Download(res, client, file);
+                    new Transmission(res, client, file);
                     return;
                 }
             } else {
 
                 // Create new, unique download-key and redirect client
-                const key = downloads.createDownloadKey(id);
+                const key = transmissions.createDownloadKey(id);
                 res.redirect(303, `/file/${id}/${key}`);
                 return;
             }

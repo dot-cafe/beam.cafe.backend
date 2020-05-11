@@ -2,14 +2,10 @@ import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
 import {Client}        from './Client';
-import {downloads}     from './downloads';
+import {transmissions} from './transmissions';
 
 export const clients = new class {
     private readonly list: Set<Client> = new Set();
-
-    public get amount(): number {
-        return this.list.size;
-    }
 
     public add(client: Client): void {
         this.list.add(client);
@@ -18,7 +14,7 @@ export const clients = new class {
     public remove(client: Client): void {
 
         // Cancel all downloads
-        const pendingDownloads = downloads.byClient(client);
+        const pendingDownloads = transmissions.byClient(client);
         for (const download of pendingDownloads) {
             download.cancel();
         }

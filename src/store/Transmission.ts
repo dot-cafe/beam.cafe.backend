@@ -3,12 +3,12 @@ import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
 import {uid}               from '../utils/uid';
 import {Client}            from './Client';
-import {downloads}         from './downloads';
+import {transmissions}     from './transmissions';
 
 /**
  * Status of a download
  */
-export enum DownloadStatus {
+export enum TransmissionStatus {
     Pending = 'Pending',
     Active = 'Active',
     Finished = 'Finished',
@@ -17,14 +17,14 @@ export enum DownloadStatus {
     PeerReset = 'PeerReset',
 }
 
-export class Download {
+export class Transmission {
+    private readonly downloaderResponse: Response;
     public readonly id: string;
     public readonly file: HostedFile;
     public readonly provider: Client;
-    private readonly downloaderResponse: Response;
 
     // Download status
-    public status: DownloadStatus = DownloadStatus.Pending;
+    public status: TransmissionStatus = TransmissionStatus.Pending;
     public done = false;
 
     // Amount of bytes transferred
@@ -48,27 +48,27 @@ export class Download {
         this.id = uid();
 
         // Add to downloads and initiate transfer
-        downloads.add(this);
+        transmissions.add(this);
         fileProvider.requestFile(file.id, this.id);
     }
 
     public cancel(): void {
-        if (this.status === DownloadStatus.Pending ||
-            this.status === DownloadStatus.Active) {
+        if (this.status === TransmissionStatus.Pending ||
+            this.status === TransmissionStatus.Active) {
 
             // This raises a network-error on the client, end would lead to an incomplete file.
             this.downloaderResponse.destroy();
         }
 
-        this.status = DownloadStatus.Cancelled;
-        downloads.remove(this);
+        this.status = TransmissionStatus.Cancelled;
+        transmissions.remove(this);
     }
 
     public accept(
         uploaderRequest: Request,
         uploaderResponse: Response
     ): void {
-        if (this.status !== DownloadStatus.Pending) {
+        if (this.status !== TransmissionStatus.Pending) {
             log('upload-failed', {
                 reason: 'Upload rejected because the download is not in a pending state.',
                 downloadId: this.id,
@@ -79,7 +79,7 @@ export class Download {
         }
 
         const {downloaderResponse} = this;
-        this.status = DownloadStatus.Active;
+        this.status = TransmissionStatus.Active;
         if (!this.headersSent) {
 
             /**
@@ -107,21 +107,21 @@ export class Download {
 
             // An error occured somewhere between both clients
             uploaderResponse.sendStatus(500);
-            this.status = DownloadStatus.Errored;
+            this.status = TransmissionStatus.Errored;
             this.done = true;
 
             // Clean up
-            downloads.remove(this);
+            transmissions.remove(this);
         });
 
         uploaderRequest.on('close', () => {
 
             // Upload is either cancelled or "paused"
             if (
-                this.status !== DownloadStatus.Cancelled &&
+                this.status !== TransmissionStatus.Cancelled &&
                 this.bytesTransferred < this.file.size
             ) {
-                this.status = DownloadStatus.Pending;
+                this.status = TransmissionStatus.Pending;
             }
         });
 
@@ -130,25 +130,25 @@ export class Download {
 
             // Finish requests
             uploaderResponse.sendStatus(200);
-            this.status = DownloadStatus.Finished;
+            this.status = TransmissionStatus.Finished;
             this.done = true;
 
             // Clean up
-            downloads.remove(this);
+            transmissions.remove(this);
         });
 
         // Dectect if the downloader closes the connection
         downloaderResponse.on('close', () => {
-            if (this.status !== DownloadStatus.Finished &&
-                this.status !== DownloadStatus.Cancelled) {
+            if (this.status !== TransmissionStatus.Finished &&
+                this.status !== TransmissionStatus.Cancelled) {
 
-                this.status = DownloadStatus.PeerReset;
+                this.status = TransmissionStatus.PeerReset;
                 this.done = true;
 
                 this.provider.sendMessage('download-cancelled', this.id);
 
                 // Cleanup
-                downloads.remove(this);
+                transmissions.remove(this);
             }
         });
     }

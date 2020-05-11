@@ -2,7 +2,7 @@ import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
 import {clients}       from '../store/clients';
-import {downloads}     from '../store/downloads';
+import {transmissions} from '../store/transmissions';
 import {typeOf}        from '../utils/type-of';
 import {handleRequest} from './request';
 
@@ -53,7 +53,7 @@ export function handleAction(
             break;
         }
         case 'cancel-request': {
-            downloads.cancelUpload(payload);
+            transmissions.cancelUpload(payload);
             break;
         }
         case 'remove-file': {

@@ -7,8 +7,8 @@ import {HostedFile}       from '../types';
 import {decryptUserAgent} from '../utils/decrypt-user-agent';
 import {typeOf}           from '../utils/type-of';
 import {uid}              from '../utils/uid';
-import {clients}          from './clients';
-import {downloads}        from './downloads';
+import {clients}       from './clients';
+import {transmissions} from './transmissions';
 
 type Settings = {
     reusableDownloadKeys: boolean;
@@ -200,7 +200,7 @@ export class Client {
         if (file) {
 
             // Cancel downloads associated with it
-            const active = downloads.byFileId(file.id);
+            const active = transmissions.byFileId(file.id);
             for (const download of active) {
                 download.cancel();
             }
@@ -215,7 +215,7 @@ export class Client {
     public refreshKeys(): void {
 
         // Cancel all downloads
-        for (const download of downloads.byClient(this)) {
+        for (const download of transmissions.byClient(this)) {
             download.cancel();
         }
 

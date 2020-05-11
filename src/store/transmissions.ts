@@ -2,16 +2,16 @@ import {Request, Response}        from 'express';
 import {config}                   from '../config';
 import {log, LogLevel}            from '../logging';
 import {uid}                      from '../utils/uid';
-import {Client}                   from './Client';
-import {Download, DownloadStatus} from './Download';
+import {Client}                           from './Client';
+import {Transmission, TransmissionStatus} from './Transmission';
 
 type DownloadRedirect = {
     timeout: number;
     fileId: string;
 }
 
-export const downloads = new class {
-    private readonly list: Set<Download> = new Set();
+export const transmissions = new class {
+    private readonly list: Set<Transmission> = new Set();
 
     /**
      * For each download a special url will be made to block further
@@ -20,19 +20,15 @@ export const downloads = new class {
      */
     private readonly redirects: Map<string, DownloadRedirect> = new Map();
 
-    public get amount(): number {
-        return this.list.size;
-    }
-
-    public add(download: Download): void {
+    public add(download: Transmission): void {
         this.list.add(download);
     }
 
-    public remove(download: Download): void {
+    public remove(download: Transmission): void {
         this.list.delete(download);
     }
 
-    public byId(id: string): Download | null {
+    public byId(id: string): Transmission | null {
         for (const item of this.list) {
             if (item.id === id) {
                 return item;
@@ -42,11 +38,11 @@ export const downloads = new class {
         return null;
     }
 
-    public byClient(client: Client): Array<Download> {
+    public byClient(client: Client): Array<Transmission> {
         return [...this.list].filter(value => value.provider === client);
     }
 
-    public byFileId(id: string): Array<Download> {
+    public byFileId(id: string): Array<Transmission> {
         return [...this.list].filter(value => value.file.id === id);
     }
 
@@ -88,7 +84,7 @@ export const downloads = new class {
                 downloadId
             }, LogLevel.INFO);
             return false;
-        } else if (download.status !== DownloadStatus.Pending) {
+        } else if (download.status !== TransmissionStatus.Pending) {
             log('accept-upload-failed', {
                 reason: 'Upload already active.',
                 downloadId
