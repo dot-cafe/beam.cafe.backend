@@ -6,13 +6,18 @@ import {transmissions} from '../store/transmissions';
 import {typeOf}        from '../utils/type-of';
 import {handleRequest} from './request';
 
+/**
+ * Handles incoming messages.
+ * Returns the client itself or the new client in case a session
+ * got restored.
+ */
 export function handleAction(
     client: Client,
     data: unknown,
     ws: WebSocket
-): void {
+): Client {
     if (typeOf(data) !== 'object') {
-        return;
+        return client;
     }
 
     const {type, payload} = data as any;
@@ -20,7 +25,7 @@ export function handleAction(
         log('invalid-payload', {
             location: 'ws'
         }, LogLevel.ERROR);
-        return;
+        return client;
     }
 
     switch (type) {
@@ -35,13 +40,11 @@ export function handleAction(
 
                 // Remove current client and use new one
                 clients.remove(client);
-                client = oldClient;
-            } else {
-
-                // Create a fresh sessions, this will clear all states client-side
-                client.createSession();
+                return oldClient;
             }
 
+            // Create a fresh sessions, this will clear all states client-side
+            client.createSession();
             break;
         }
         case 'create-session': {
@@ -80,4 +83,6 @@ export function handleAction(
             }, LogLevel.ERROR);
         }
     }
+
+    return client;
 }

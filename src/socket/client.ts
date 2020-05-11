@@ -6,7 +6,7 @@ import {handleAction}  from './action';
 
 /* eslint-disable no-console */
 export const acceptClient = (ws: WebSocket, req: Request): void => {
-    const client = new Client(ws, req);
+    let client = new Client(ws, req);
 
     ws.on('message', (message: string) => {
 
@@ -17,7 +17,7 @@ export const acceptClient = (ws: WebSocket, req: Request): void => {
 
         // Try to parse message
         try {
-            handleAction(client, JSON.parse(message), ws);
+            client = handleAction(client, JSON.parse(message), ws);
         } catch (e) {
             log('invalid-payload', {
                 location: 'ws'
