@@ -18,6 +18,7 @@ export enum TransmissionStatus {
 }
 
 export class Transmission {
+    private readonly downloaderRequest: Request;
     private readonly downloaderResponse: Response;
     public readonly id: string;
     public readonly file: HostedFile;
@@ -38,10 +39,12 @@ export class Transmission {
     private headersSent = false;
 
     constructor(
+        downloaderRequest: Request,
         downloaderResponse: Response,
         fileProvider: Client,
         file: HostedFile
     ) {
+        this.downloaderRequest = downloaderRequest;
         this.downloaderResponse = downloaderResponse;
         this.provider = fileProvider;
         this.file = file;
@@ -50,6 +53,42 @@ export class Transmission {
         // Add to downloads and initiate transfer
         transmissions.add(this);
         fileProvider.requestFile(file.id, this.id);
+
+        this.bindDownloaderEvents();
+    }
+
+    private bindDownloaderEvents(): void {
+        const {downloaderRequest, downloaderResponse} = this;
+
+        // Maybe the downloaders browser itself has a timeout
+        downloaderRequest.on('close', () => {
+            if (this.status !== TransmissionStatus.Finished &&
+                this.status !== TransmissionStatus.Cancelled &&
+                this.status !== TransmissionStatus.PeerReset) {
+                this.status = TransmissionStatus.PeerReset;
+                this.done = true;
+
+                this.provider.sendMessage('download-cancelled', this.id);
+
+                // Cleanup
+                transmissions.remove(this);
+            }
+        });
+
+        // Dectect if the downloader closes the connection
+        downloaderResponse.on('close', () => {
+            if (this.status !== TransmissionStatus.Finished &&
+                this.status !== TransmissionStatus.Cancelled) {
+
+                this.status = TransmissionStatus.PeerReset;
+                this.done = true;
+
+                this.provider.sendMessage('download-cancelled', this.id);
+
+                // Cleanup
+                transmissions.remove(this);
+            }
+        });
     }
 
     public cancel(): void {
@@ -135,21 +174,6 @@ export class Transmission {
 
             // Clean up
             transmissions.remove(this);
-        });
-
-        // Dectect if the downloader closes the connection
-        downloaderResponse.on('close', () => {
-            if (this.status !== TransmissionStatus.Finished &&
-                this.status !== TransmissionStatus.Cancelled) {
-
-                this.status = TransmissionStatus.PeerReset;
-                this.done = true;
-
-                this.provider.sendMessage('download-cancelled', this.id);
-
-                // Cleanup
-                transmissions.remove(this);
-            }
         });
     }
 }

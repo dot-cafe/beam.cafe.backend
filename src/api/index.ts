@@ -33,7 +33,7 @@ export const api = (): Router => {
 
                     // Start download
                     const [client, file] = resolved;
-                    new Transmission(res, client, file);
+                    new Transmission(req, res, client, file);
                     return;
                 }
             } else {
