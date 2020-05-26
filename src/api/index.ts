@@ -1,6 +1,8 @@
-import {Router}    from 'express';
-import {TEMPLATES} from '../constants';
-import {clients}      from '../store/clients';
+import {Router}        from 'express';
+import {TEMPLATES}     from '../constants';
+import {clients}       from '../store/clients';
+import {Stream}        from '../store/Stream';
+import {streams}       from '../store/streams';
 import {Transmission}  from '../store/Transmission';
 import {transmissions} from '../store/transmissions';
 import {renderEJS}     from '../utils/render-ejs';
@@ -9,9 +11,15 @@ export const api = (): Router => {
     const router = Router();
 
     router.post('/file/:id', (req, res) => {
-
-        // Validate id
         if (transmissions.acceptUpload(req, res, req.params.id)) {
+            return;
+        }
+
+        res.sendStatus(400);
+    });
+
+    router.post('/stream/:id', (req, res) => {
+        if (streams.acceptTransfer(req, res, req.params.id)) {
             return;
         }
 
@@ -29,7 +37,7 @@ export const api = (): Router => {
             if (hash) {
 
                 // Check if reservation can be removed
-                if (transmissions.removeDownloadKey(hash)) {
+                if (transmissions.removeTransmissionKey(hash)) {
 
                     // Start download
                     const [client, file] = resolved;
@@ -39,8 +47,39 @@ export const api = (): Router => {
             } else {
 
                 // Create new, unique download-key and redirect client
-                const key = transmissions.createDownloadKey(id);
+                const key = transmissions.createTransmissionKey(id);
                 res.redirect(303, `/file/${id}/${key}`);
+                return;
+            }
+        }
+
+        renderEJS(TEMPLATES.DOWNLOAD_GONE, res);
+    });
+
+    router.get('/stream/:id/:hash?', (req, res) => {
+        const {id, hash} = req.params;
+        const resolved = clients.resolveFile(id);
+
+        // Validate provider
+        if (resolved) {
+
+            // Check if download-hash is present
+            if (hash) {
+
+                // Validate transmission
+                // TODO: Cancel by removing the key!
+                if (streams.checkStreamKey(hash)) {
+
+                    // Start stream
+                    const [client, file] = resolved;
+                    new Stream(req, res, client, file);
+                    return;
+                }
+            } else {
+
+                // Create new, unique stream-key and redirect client
+                const key = streams.createStreamKey(id);
+                res.redirect(302, `/stream/${id}/${key}`);
                 return;
             }
         }

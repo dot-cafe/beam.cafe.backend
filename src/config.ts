@@ -9,6 +9,7 @@ type Config = {
         port: number;
         api: string;
         internalIdSize: number;
+        mediaStreamChunkSize: number;
     };
 
     security: {

@@ -2,7 +2,8 @@
     "server": {
         "port": 8080,
         "api": "/",
-        "internalIdSize": 32
+        "internalIdSize": 32,
+        "mediaStreamChunkSize": 4096000
     },
     "security": {
         "downloadKeySize": 64,

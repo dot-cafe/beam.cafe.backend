@@ -1,24 +1,24 @@
-import {Request, Response}        from 'express';
-import {config}                   from '../config';
-import {log, LogLevel}            from '../logging';
-import {uid}                      from '../utils/uid';
+import {Request, Response}                from 'express';
+import {config}                           from '../config';
+import {log, LogLevel}                    from '../logging';
+import {uid}                              from '../utils/uid';
 import {Client}                           from './Client';
 import {Transmission, TransmissionStatus} from './Transmission';
 
-type DownloadRedirect = {
+type TransmissionRedirect = {
     timeout: number;
     fileId: string;
 }
 
 export const transmissions = new class {
-    private readonly list: Set<Transmission> = new Set();
+    private readonly list: Set<Transmission> = new Set(); // TODO Extend set?
 
     /**
      * For each download a special url will be made to block further
      * download attempts by the browser in case the user cancelled the download.
      * These are only valid for 1 minute.
      */
-    private readonly redirects: Map<string, DownloadRedirect> = new Map();
+    private readonly redirects: Map<string, TransmissionRedirect> = new Map();
 
     public add(download: Transmission): void {
         this.list.add(download);
@@ -46,7 +46,7 @@ export const transmissions = new class {
         return [...this.list].filter(value => value.file.id === id);
     }
 
-    public createDownloadKey(fileId: string): string {
+    public createTransmissionKey(fileId: string): string {
         const downloadId = uid(64);
 
         this.redirects.set(downloadId, {
@@ -59,7 +59,11 @@ export const transmissions = new class {
         return downloadId;
     }
 
-    public removeDownloadKey(downloadId: string): boolean {
+    public checkTransmissionKey(downloadId: string): boolean {
+        return this.redirects.has(downloadId);
+    }
+
+    public removeTransmissionKey(downloadId: string): boolean {
         const item = this.redirects.get(downloadId);
 
         if (!item) {

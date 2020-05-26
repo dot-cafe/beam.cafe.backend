@@ -7,8 +7,8 @@ import {HostedFile}       from '../types';
 import {decryptUserAgent} from '../utils/decrypt-user-agent';
 import {typeOf}           from '../utils/type-of';
 import {uid}              from '../utils/uid';
-import {clients}       from './clients';
-import {transmissions} from './transmissions';
+import {clients}          from './clients';
+import {transmissions}    from './transmissions';
 
 type Settings = {
     reusableDownloadKeys: boolean;
@@ -153,6 +153,35 @@ export class Client {
         })));
 
         this.files.push(...files);
+    }
+
+    // TODO: Rename keywords
+    public requestStream(
+        fileId: string,
+        downloadId: string, // streamId
+        range: [number, number] | null
+    ): void {
+        const file = this.files.find(value => value.id === fileId);
+
+        if (file) {
+            this.sendMessage('stream-request', {
+                downloadId, fileId, range
+            });
+
+            // TODO: Custom events for streaming
+            log('request-upload', {
+                userId: this.id,
+                downloadId,
+                fileId
+            }, LogLevel.DEBUG);
+        } else {
+            log('request-upload-failed', {
+                reason: 'Requested file does not exist any longer',
+                userId: this.id,
+                downloadId,
+                fileId
+            }, LogLevel.WARNING);
+        }
     }
 
     public requestFile(
