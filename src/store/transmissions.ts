@@ -1,7 +1,7 @@
-import {Request, Response}        from 'express';
-import {config}                   from '../config';
-import {log, LogLevel}            from '../logging';
-import {uid}                      from '../utils/uid';
+import {Request, Response}                from 'express';
+import {config}                           from '../config';
+import {log, LogLevel}                    from '../logging';
+import {uid}                              from '../utils/uid';
 import {Client}                           from './Client';
 import {Transmission, TransmissionStatus} from './Transmission';
 
@@ -10,8 +10,8 @@ type DownloadRedirect = {
     fileId: string;
 }
 
-export const transmissions = new class {
-    private readonly list: Set<Transmission> = new Set();
+// TODO: DB Superclass?
+export const transmissions = new class extends Set<Transmission> {
 
     /**
      * For each download a special url will be made to block further
@@ -20,16 +20,8 @@ export const transmissions = new class {
      */
     private readonly redirects: Map<string, DownloadRedirect> = new Map();
 
-    public add(download: Transmission): void {
-        this.list.add(download);
-    }
-
-    public remove(download: Transmission): void {
-        this.list.delete(download);
-    }
-
     public byId(id: string): Transmission | null {
-        for (const item of this.list) {
+        for (const item of this) {
             if (item.id === id) {
                 return item;
             }
@@ -39,11 +31,11 @@ export const transmissions = new class {
     }
 
     public byClient(client: Client): Array<Transmission> {
-        return [...this.list].filter(value => value.provider === client);
+        return [...this].filter(value => value.provider === client);
     }
 
     public byFileId(id: string): Array<Transmission> {
-        return [...this.list].filter(value => value.file.id === id);
+        return [...this].filter(value => value.file.id === id);
     }
 
     public createDownloadKey(fileId: string): string {

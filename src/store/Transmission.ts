@@ -71,7 +71,7 @@ export class Transmission {
                 this.provider.sendMessage('download-cancelled', this.id);
 
                 // Cleanup
-                transmissions.remove(this);
+                transmissions.delete(this);
             }
         });
 
@@ -86,7 +86,7 @@ export class Transmission {
                 this.provider.sendMessage('download-cancelled', this.id);
 
                 // Cleanup
-                transmissions.remove(this);
+                transmissions.delete(this);
             }
         });
     }
@@ -100,7 +100,7 @@ export class Transmission {
         }
 
         this.status = TransmissionStatus.Cancelled;
-        transmissions.remove(this);
+        transmissions.delete(this);
     }
 
     public accept(
@@ -150,7 +150,7 @@ export class Transmission {
             this.done = true;
 
             // Clean up
-            transmissions.remove(this);
+            transmissions.delete(this);
         });
 
         uploaderRequest.on('close', () => {
@@ -173,7 +173,7 @@ export class Transmission {
             this.done = true;
 
             // Clean up
-            transmissions.remove(this);
+            transmissions.delete(this);
         });
     }
 }

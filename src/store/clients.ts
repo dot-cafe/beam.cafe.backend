@@ -4,14 +4,9 @@ import {HostedFile}    from '../types';
 import {Client}        from './Client';
 import {transmissions} from './transmissions';
 
-export const clients = new class {
-    private readonly list: Set<Client> = new Set();
+export const clients = new class extends Set<Client> {
 
-    public add(client: Client): void {
-        this.list.add(client);
-    }
-
-    public remove(client: Client): void {
+    public delete(client: Client): boolean {
 
         // Cancel all downloads
         const pendingDownloads = transmissions.byClient(client);
@@ -23,7 +18,7 @@ export const clients = new class {
             userId: client.id
         }, LogLevel.DEBUG);
 
-        this.list.delete(client);
+        return this.delete(client);
     }
 
     public resolveFile(id: string | unknown): [Client, HostedFile] | null {
@@ -31,7 +26,7 @@ export const clients = new class {
             return null;
         }
 
-        for (const client of this.list) {
+        for (const client of this) {
             for (const file of client.files) {
                 if (file.id === id) {
                     return [client, file];
@@ -48,7 +43,7 @@ export const clients = new class {
         }
 
         // Find client with the corresponding session-key
-        for (const client of this.list) {
+        for (const client of this) {
             if (
                 client.sessionKey !== null &&
                 client.sessionKey === key
