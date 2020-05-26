@@ -21,12 +21,13 @@
 
 <main>
     <h3><%= file.name %></h3>
+
     <section>
         <p>Size: <b><%= prettyBytes(file.size) %></b></p>
     </section>
 
     <a href="/file/<%= file.id %>" target="_blank">
-        <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M 11 2 C 10.448 2 10 2.448 10 3 L 10 11 L 6.5 11 A 0.5 0.5 0 0 0 6 11.5 A 0.5 0.5 0 0 0 6.1464844 11.853516 A 0.5 0.5 0 0 0 6.1777344 11.882812 L 11.283203 16.697266 L 11.316406 16.728516 A 1 1 0 0 0 12 17 A 1 1 0 0 0 12.683594 16.728516 L 12.697266 16.716797 A 1 1 0 0 0 12.707031 16.705078 L 17.810547 11.892578 A 0.5 0.5 0 0 0 17.839844 11.865234 L 17.847656 11.859375 A 0.5 0.5 0 0 0 17.853516 11.853516 A 0.5 0.5 0 0 0 18 11.5 A 0.5 0.5 0 0 0 17.5 11 L 14 11 L 14 3 C 14 2.448 13.552 2 13 2 L 12 2 L 11 2 z M 3 20 A 1.0001 1.0001 0 1 0 3 22 L 21 22 A 1.0001 1.0001 0 1 0 21 20 L 3 20 z"/>
         </svg>
         <span>Download</span>
@@ -47,7 +48,7 @@
         border-radius: 0.5em;
         box-shadow: 0 0.2em 1em rgba(0, 0, 0, 0.15);
         background: var(--c-background-primary);
-        color: var(--c-text-secondary-accent);
+        color: var(--c-text-secondary);
         max-width: 75vw;
         animation: fadeIn 0.5s ease-in-out;
     }
@@ -78,8 +79,8 @@
         align-items: center;
         text-decoration: none;
         background: var(--c-primary);
-        color: var(--c-text-secondary-accent);
-        margin: 0.5em auto 0.5em;
+        color: var(--c-text-secondary);
+        margin: 0.5em;
         padding: 0.5em 1.15em;
         border-radius: 0.25em;
         transition: all 0.3s;
@@ -89,7 +90,7 @@
     main a svg {
         width: 1em;
         height: 1em;
-        fill: var(--c-text-secondary-accent);
+        fill: var(--c-text-secondary);
         margin-right: 0.5em;
     }
 
@@ -99,6 +100,10 @@
 
     main a:hover {
         background: var(--c-primary-accent);
+    }
+
+    main a:focus {
+        box-shadow: 0 0 0 2px var(--c-focus-border-primary);
     }
 </style>
 

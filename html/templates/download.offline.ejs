@@ -36,7 +36,7 @@
         border-radius: 0.5em;
         box-shadow: 0 0.2em 1em rgba(0, 0, 0, 0.15);
         background: var(--c-background-primary);
-        color: var(--c-text-secondary-accent);
+        color: var(--c-text-secondary);
         max-width: 75vw;
         animation: fadeIn 0.5s ease-in-out;
         background: var(--c-background-primary);
@@ -45,12 +45,12 @@
     }
 
     main p {
-        color: var(--c-text-secondary-accent);
+        color: var(--c-text-secondary);
     }
 
     main a {
         background: var(--c-primary);
-        color: var(--c-text-secondary-accent);
+        color: var(--c-text-secondary);
         border-radius: 0.25em;
         padding: 0.35em 1.25em;
         margin: 1em auto 0;
@@ -60,6 +60,10 @@
 
     main a:hover {
         background: var(--c-primary-accent);
+    }
+
+    main a:focus {
+        box-shadow: 0 0 0 2px var(--c-focus-border-primary);
     }
 
     main > svg {
