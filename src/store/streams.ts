@@ -2,6 +2,7 @@ import {Request, Response}    from 'express';
 import {config}               from '../config';
 import {log, LogLevel}        from '../logging';
 import {uid}                  from '../utils/uid';
+import {Client}               from './Client';
 import {Stream, StreamStatus} from './Stream';
 
 export const streams = new class extends Set<Stream> {
@@ -16,6 +17,14 @@ export const streams = new class extends Set<Stream> {
 
     public checkStreamKey(key: string): boolean {
         return this.streamKeys.has(key);
+    }
+
+    public removeStreamKey(key: string): boolean {
+        return this.streamKeys.delete(key);
+    }
+
+    public byClient(client: Client): Array<Stream> {
+        return [...this].filter(value => value.provider === client);
     }
 
     public byId(id: string): Stream | null {

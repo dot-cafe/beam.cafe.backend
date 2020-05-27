@@ -69,6 +69,18 @@ export class Stream {
         });
     }
 
+    public cancel(): void {
+        if (this.status === StreamStatus.Pending ||
+            this.status === StreamStatus.Streaming) {
+
+            // This raises a network-error on the client, end would lead to an incomplete file.
+            this.downloaderResponse.destroy();
+        }
+
+        this.status = StreamStatus.Cancelled;
+        streams.delete(this);
+    }
+
     public accept(
         uploaderRequest: Request,
         uploaderResponse: Response

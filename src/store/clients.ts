@@ -2,6 +2,7 @@ import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
 import {Client}        from './Client';
+import {streams}       from './streams';
 import {transmissions} from './transmissions';
 
 export const clients = new class {
@@ -17,6 +18,12 @@ export const clients = new class {
         const pendingDownloads = transmissions.byClient(client);
         for (const download of pendingDownloads) {
             download.cancel();
+        }
+
+        // Cancel all streams
+        const activeStreams = streams.byClient(client);
+        for (const stream of activeStreams) {
+            stream.cancel();
         }
 
         log('destroy-session', {
