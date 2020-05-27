@@ -1,7 +1,8 @@
-import {Request, Response} from 'express';
-import {config}            from '../config';
-import {uid}               from '../utils/uid';
-import {Stream}            from './Stream';
+import {Request, Response}    from 'express';
+import {config}               from '../config';
+import {log, LogLevel}        from '../logging';
+import {uid}                  from '../utils/uid';
+import {Stream, StreamStatus} from './Stream';
 
 export const streams = new class extends Set<Stream> {
     private readonly streamKeys: Map<string, string> = new Map();
@@ -34,22 +35,17 @@ export const streams = new class extends Set<Stream> {
     ): boolean {
         const stream = this.byId(streamId);
 
-        // TODO:
-        // if (!stream) {
-        //     log('accept-upload-failed', {
-        //         reason: 'Download not found.',
-        //         streamId
-        //     }, LogLevel.INFO);
-        //     return false;
-        // } else if (stream.status !== TransmissionStatus.Pending) {
-        //     log('accept-upload-failed', {
-        //         reason: 'Upload already active.',
-        //         streamId
-        //     }, LogLevel.INFO);
-        //     return false;
-        // }
-
         if (!stream) {
+            log('accept-stream-failed', {
+                reason: 'Stream not found.',
+                streamId
+            }, LogLevel.INFO);
+            return false;
+        } else if (stream.status !== StreamStatus.Pending) {
+            log('accept-stream-failed', {
+                reason: 'Stream already active.',
+                streamId
+            }, LogLevel.INFO); // TODO: That's an error
             return false;
         }
 

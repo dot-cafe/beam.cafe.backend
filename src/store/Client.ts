@@ -155,30 +155,31 @@ export class Client {
         this.files.push(...files);
     }
 
-    // TODO: Rename keywords
     public requestStream(
         fileId: string,
-        downloadId: string, // streamId
+        streamId: string,
+        streamKey: string,
         range: [number, number] | null
     ): void {
         const file = this.files.find(value => value.id === fileId);
 
         if (file) {
             this.sendMessage('stream-request', {
-                downloadId, fileId, range
+                streamKey, streamId, fileId, range
             });
 
-            // TODO: Custom events for streaming
-            log('request-upload', {
+            log('request-stream', {
                 userId: this.id,
-                downloadId,
+                streamKey,
+                streamId,
                 fileId
             }, LogLevel.DEBUG);
         } else {
-            log('request-upload-failed', {
+            log('request-stream-failed', {
                 reason: 'Requested file does not exist any longer',
                 userId: this.id,
-                downloadId,
+                streamKey,
+                streamId,
                 fileId
             }, LogLevel.WARNING);
         }

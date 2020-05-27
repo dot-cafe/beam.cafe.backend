@@ -15,8 +15,7 @@ export enum StreamStatus {
     Streaming = 'Streaming',
     Finished = 'Finished',
     Errored = 'Errored',
-    Cancelled = 'Cancelled',
-    PeerReset = 'PeerReset',
+    Cancelled = 'Cancelled'
 }
 
 export class Stream {
@@ -39,7 +38,8 @@ export class Stream {
         downloaderRequest: Request,
         downloaderResponse: Response,
         fileProvider: Client,
-        file: HostedFile
+        file: HostedFile,
+        streamKey: string
     ) {
         this.downloaderRequest = downloaderRequest;
         this.downloaderResponse = downloaderResponse;
@@ -55,7 +55,7 @@ export class Stream {
         this.range = range;
         this.hadRange = !!rangeString;
 
-        fileProvider.requestStream(file.id, this.id, range);
+        fileProvider.requestStream(file.id, this.id, streamKey, range);
         this.bindDownloaderEvents();
     }
 
@@ -106,7 +106,6 @@ export class Stream {
             downloaderResponse.end();
 
             // An error occured somewhere between both clients
-            // uploaderResponse.sendStatus(500);
             this.status = StreamStatus.Errored;
 
             // Clean up
@@ -121,7 +120,10 @@ export class Stream {
 
         uploaderRequest.on('end', () => {
             downloaderResponse.end();
-            this.status = StreamStatus.Finished;
+
+            if (range[1] === file.size) {
+                this.status = StreamStatus.Finished;
+            }
 
             // Clean up
             streams.delete(this);

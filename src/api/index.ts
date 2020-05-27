@@ -72,7 +72,7 @@ export const api = (): Router => {
 
                     // Start stream
                     const [client, file] = resolved;
-                    new Stream(req, res, client, file);
+                    new Stream(req, res, client, file, hash);
                     return;
                 }
             } else {
