@@ -1,0 +1,42 @@
+.btn {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--c-text-secondary);
+    margin: 0.5em;
+    padding: 0.5em 1.15em;
+    border-radius: 0.25em;
+    transition: all 0.3s;
+    font-size: 1.1em;
+}
+
+.btn > svg {
+    width: 1em;
+    height: 1em;
+    fill: var(--c-text-secondary);
+    margin-right: 0.5em;
+}
+
+.btn.primary {
+    background: var(--c-primary);
+}
+
+.btn.primary:hover {
+    background: var(--c-primary-accent);
+}
+
+.btn.primary:focus {
+    box-shadow: 0 0 0 2px var(--c-focus-border-primary);
+}
+
+.btn.green {
+    background: var(--c-green);
+}
+
+.btn.green:hover {
+    background: var(--c-green-accent);
+}
+
+.btn.green:focus {
+    box-shadow: 0 0 0 2px var(--c-focus-border-green);
+}

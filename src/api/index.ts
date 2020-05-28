@@ -69,7 +69,6 @@ export const api = (): Router => {
             if (hash) {
 
                 // Validate transmission
-                // TODO: Cancel by removing the key!
                 if (streams.checkStreamKey(hash)) {
 
                     // Start stream

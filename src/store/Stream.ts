@@ -111,7 +111,6 @@ export class Stream {
 
         uploaderRequest.on('data', chunk => {
             downloaderResponse.write(chunk);
-            // TODO: Count bytes?
         });
 
         uploaderRequest.on('error', () => {
