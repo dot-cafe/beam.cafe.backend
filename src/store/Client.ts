@@ -51,8 +51,8 @@ export class Client {
 
         const uaHeader = req.headers['user-agent'];
         this.userAgent = config.logs.logUserAgent ?
-            uaHeader ? decryptUserAgent(uaHeader) : 'unknown'
-            : 'hidden';
+            uaHeader ? decryptUserAgent(uaHeader) : 'unknown' :
+            'hidden';
 
         clients.add(this);
     }
@@ -284,7 +284,7 @@ export class Client {
             return false;
         }
 
-        for (const [key, value] of Object.entries(settings as object)) {
+        for (const [key, value] of Object.entries(settings as Record<string, unknown>)) {
             this.applySetting(key as any, value);
         }
 

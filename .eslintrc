@@ -11,13 +11,17 @@
         "simon/lib/node"
     ],
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "align-import"
     ],
     "env": {
         "browser": true,
         "es6": true
     },
     "rules": {
-        "@typescript-eslint/no-explicit-any": "off"
+        "no-multi-spaces": ["error", {"exceptions": {"ImportDeclaration": true}}],
+        "align-import/align-import": "error",
+        "@typescript-eslint/no-explicit-any": "off",
+        "new-cap": "off"
     }
 }

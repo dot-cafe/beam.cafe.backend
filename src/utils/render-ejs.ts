@@ -7,7 +7,7 @@ const cache = process.env.NODE_ENV !== 'development';
 export const renderEJS = (
     template: string,
     res: Response,
-    data: object = {}
+    data: Record<string, unknown> = {}
 ): void => {
     ejs.renderFile(template, {
         prettyBytes,

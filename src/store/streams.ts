@@ -9,7 +9,7 @@ export const streams = new class extends Set<Stream> {
     private readonly streamKeys: Map<string, string> = new Map();
 
     public createStreamKey(fileid: string): string {
-        const id = uid(config.security.streamKeySize)
+        const id = uid(config.security.streamKeySize);
         this.streamKeys.set(id, fileid);
 
         return id;
