@@ -1,11 +1,12 @@
 import {Request, Response}    from 'express';
 import {config}               from '../config';
 import {log, LogLevel}        from '../logging';
+import {Collection}           from '../utils/db/Collection';
 import {uid}                  from '../utils/uid';
 import {Client}               from './Client';
 import {Stream, StreamStatus} from './Stream';
 
-export const streams = new class extends Set<Stream> {
+export const streams = new class extends Collection<Stream> {
     private readonly streamKeys: Map<string, string> = new Map();
 
     public createStreamKey(fileid: string): string {
@@ -24,17 +25,7 @@ export const streams = new class extends Set<Stream> {
     }
 
     public byClient(client: Client): Array<Stream> {
-        return [...this].filter(value => value.provider === client);
-    }
-
-    public byId(id: string): Stream | null {
-        for (const item of this) {
-            if (item.id === id) {
-                return item;
-            }
-        }
-
-        return null;
+        return this.filter(value => value.provider === client);
     }
 
     public acceptTransfer(
@@ -42,7 +33,7 @@ export const streams = new class extends Set<Stream> {
         uploaderResponse: Response,
         streamId: string
     ): boolean {
-        const stream = this.byId(streamId);
+        const stream = this.findItemById(streamId);
 
         if (!stream) {
             log('accept-stream-failed', {

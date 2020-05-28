@@ -63,10 +63,10 @@ export class Client {
 
     public markDisconnected(): void {
         if (this.settings.strictSession) {
-            clients.remove(this);
+            clients.delete(this);
         } else {
             this.connectionTimeout = setTimeout(
-                () => clients.remove(this),
+                () => clients.delete(this),
                 config.security.clientWebSocketConnectionTimeout
             );
         }

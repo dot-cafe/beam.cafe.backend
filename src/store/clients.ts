@@ -1,13 +1,14 @@
 import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
+import {Collection}    from '../utils/db/Collection';
 import {Client}        from './Client';
 import {streams}       from './streams';
 import {transmissions} from './transmissions';
 
-export const clients = new class extends Set<Client> {
+export const clients = new class extends Collection<Client> {
 
-    public remove(client: Client): boolean {
+    public delete(client: Client): boolean {
 
         // Cancel all downloads
         const pendingDownloads = transmissions.byClient(client);
@@ -25,7 +26,7 @@ export const clients = new class extends Set<Client> {
             userId: client.id
         }, LogLevel.DEBUG);
 
-        return this.delete(client);
+        return super.delete(client);
     }
 
     public resolveFile(id: string | unknown): [Client, HostedFile] | null {

@@ -1,6 +1,7 @@
 import {Request, Response}                from 'express';
 import {config}                           from '../config';
 import {log, LogLevel}                    from '../logging';
+import {Collection}                       from '../utils/db/Collection';
 import {uid}                              from '../utils/uid';
 import {Client}                           from './Client';
 import {Transmission, TransmissionStatus} from './Transmission';
@@ -10,8 +11,7 @@ type TransmissionRedirect = {
     fileId: string;
 }
 
-// TODO: DB Superclass?
-export const transmissions = new class extends Set<Transmission> {
+export const transmissions = new class extends Collection<Transmission> {
 
     /**
      * For each download a special url will be made to block further
@@ -20,22 +20,12 @@ export const transmissions = new class extends Set<Transmission> {
      */
     private readonly redirects: Map<string, TransmissionRedirect> = new Map();
 
-    public byId(id: string): Transmission | null {
-        for (const item of this) {
-            if (item.id === id) {
-                return item;
-            }
-        }
-
-        return null;
-    }
-
     public byClient(client: Client): Array<Transmission> {
-        return [...this].filter(value => value.provider === client);
+        return this.filter(value => value.provider === client);
     }
 
     public byFileId(id: string): Array<Transmission> {
-        return [...this].filter(value => value.file.id === id);
+        return this.filter(value => value.file.id === id);
     }
 
     public createTransmissionKey(fileId: string): string {
@@ -72,7 +62,7 @@ export const transmissions = new class extends Set<Transmission> {
         uploaderResponse: Response,
         downloadId: string
     ): boolean {
-        const download = this.byId(downloadId);
+        const download = this.findItemById(downloadId);
 
         if (!download) {
             log('accept-upload-failed', {
@@ -97,7 +87,7 @@ export const transmissions = new class extends Set<Transmission> {
             return false;
         }
 
-        const download = this.byId(downloadId);
+        const download = this.findItemById(downloadId);
         if (download) {
             download.cancel();
             return true;

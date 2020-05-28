@@ -19,8 +19,6 @@ export enum StreamStatus {
 }
 
 export class Stream {
-    private readonly downloaderRequest: Request;
-    private readonly downloaderResponse: Response;
     public readonly hadRange: boolean;
     public readonly range: ByteRangeHeader;
     public readonly id: string;
@@ -29,6 +27,8 @@ export class Stream {
 
     // Stream status
     public status: StreamStatus = StreamStatus.Pending;
+    private readonly downloaderRequest: Request;
+    private readonly downloaderResponse: Response;
 
     // The uploader's request and response
     private uploaderRequest: Request | null = null;
@@ -57,16 +57,6 @@ export class Stream {
 
         fileProvider.requestStream(file.id, this.id, streamKey, range);
         this.bindDownloaderEvents();
-    }
-
-    private bindDownloaderEvents(): void {
-        const {downloaderRequest} = this;
-
-        downloaderRequest.on('close', () => {
-            this.status = StreamStatus.Pending;
-            this.provider.sendMessage('stream-cancelled', this.id);
-            streams.delete(this);
-        });
     }
 
     public cancel(): void {
@@ -137,6 +127,16 @@ export class Stream {
             }
 
             // Clean up
+            streams.delete(this);
+        });
+    }
+
+    private bindDownloaderEvents(): void {
+        const {downloaderRequest} = this;
+
+        downloaderRequest.on('close', () => {
+            this.status = StreamStatus.Pending;
+            this.provider.sendMessage('stream-cancelled', this.id);
             streams.delete(this);
         });
     }

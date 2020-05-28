@@ -18,8 +18,6 @@ export enum TransmissionStatus {
 }
 
 export class Transmission {
-    private readonly downloaderRequest: Request;
-    private readonly downloaderResponse: Response;
     public readonly id: string;
     public readonly file: HostedFile;
     public readonly provider: Client;
@@ -27,6 +25,8 @@ export class Transmission {
     // Download status
     public status: TransmissionStatus = TransmissionStatus.Pending;
     public done = false;
+    private readonly downloaderRequest: Request;
+    private readonly downloaderResponse: Response;
 
     // Amount of bytes transferred
     private bytesTransferred = 0;
@@ -55,40 +55,6 @@ export class Transmission {
         fileProvider.requestFile(file.id, this.id);
 
         this.bindDownloaderEvents();
-    }
-
-    private bindDownloaderEvents(): void {
-        const {downloaderRequest, downloaderResponse} = this;
-
-        // Maybe the downloaders browser itself has a timeout
-        downloaderRequest.on('close', () => {
-            if (this.status !== TransmissionStatus.Finished &&
-                this.status !== TransmissionStatus.Cancelled &&
-                this.status !== TransmissionStatus.PeerReset) {
-                this.status = TransmissionStatus.PeerReset;
-                this.done = true;
-
-                this.provider.sendMessage('download-cancelled', this.id);
-
-                // Cleanup
-                transmissions.delete(this);
-            }
-        });
-
-        // Dectect if the downloader closes the connection
-        downloaderResponse.on('close', () => {
-            if (this.status !== TransmissionStatus.Finished &&
-                this.status !== TransmissionStatus.Cancelled) {
-
-                this.status = TransmissionStatus.PeerReset;
-                this.done = true;
-
-                this.provider.sendMessage('download-cancelled', this.id);
-
-                // Cleanup
-                transmissions.delete(this);
-            }
-        });
     }
 
     public cancel(): void {
@@ -174,6 +140,40 @@ export class Transmission {
 
             // Clean up
             transmissions.delete(this);
+        });
+    }
+
+    private bindDownloaderEvents(): void {
+        const {downloaderRequest, downloaderResponse} = this;
+
+        // Maybe the downloaders browser itself has a timeout
+        downloaderRequest.on('close', () => {
+            if (this.status !== TransmissionStatus.Finished &&
+                this.status !== TransmissionStatus.Cancelled &&
+                this.status !== TransmissionStatus.PeerReset) {
+                this.status = TransmissionStatus.PeerReset;
+                this.done = true;
+
+                this.provider.sendMessage('download-cancelled', this.id);
+
+                // Cleanup
+                transmissions.delete(this);
+            }
+        });
+
+        // Dectect if the downloader closes the connection
+        downloaderResponse.on('close', () => {
+            if (this.status !== TransmissionStatus.Finished &&
+                this.status !== TransmissionStatus.Cancelled) {
+
+                this.status = TransmissionStatus.PeerReset;
+                this.done = true;
+
+                this.provider.sendMessage('download-cancelled', this.id);
+
+                // Cleanup
+                transmissions.delete(this);
+            }
         });
     }
 }
