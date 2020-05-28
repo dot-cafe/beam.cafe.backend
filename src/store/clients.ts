@@ -7,7 +7,7 @@ import {transmissions} from './transmissions';
 
 export const clients = new class extends Set<Client> {
 
-    public delete(client: Client): boolean {
+    public remove(client: Client): boolean {
 
         // Cancel all downloads
         const pendingDownloads = transmissions.byClient(client);

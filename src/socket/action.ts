@@ -40,7 +40,7 @@ export function handleAction(
             if (oldClient) {
 
                 // Remove current client and use new one
-                clients.delete(client);
+                clients.remove(client);
                 return oldClient;
             }
 
