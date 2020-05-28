@@ -2,6 +2,7 @@ import * as WebSocket  from 'ws';
 import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
 import {clients}       from '../store/clients';
+import {streams}       from '../store/streams';
 import {transmissions} from '../store/transmissions';
 import {typeOf}        from '../utils/type-of';
 import {handleRequest} from './request';
@@ -57,6 +58,10 @@ export function handleAction(
         }
         case 'cancel-request': {
             transmissions.cancelUpload(payload);
+            break;
+        }
+        case 'cancel-stream': {
+            streams.removeStreamKey(payload);
             break;
         }
         case 'remove-file': {

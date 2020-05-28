@@ -9,9 +9,11 @@ type Config = {
         port: number;
         api: string;
         internalIdSize: number;
+        mediaStreamChunkSize: number;
     };
 
     security: {
+        streamKeySize: number;
         downloadKeySize: number;
         downloadKeyMaxAge: number;
         clientWebSocketConnectionTimeout: number;

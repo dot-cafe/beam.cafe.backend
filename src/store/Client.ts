@@ -7,23 +7,26 @@ import {HostedFile}       from '../types';
 import {decryptUserAgent} from '../utils/decrypt-user-agent';
 import {typeOf}           from '../utils/type-of';
 import {uid}              from '../utils/uid';
-import {clients}       from './clients';
-import {transmissions} from './transmissions';
+import {clients}          from './clients';
+import {transmissions}    from './transmissions';
 
 type Settings = {
     reusableDownloadKeys: boolean;
     strictSession: boolean;
+    allowStreaming: boolean;
 }
 
 export const ClientSettings = Joi.object({
     reusableDownloadKeys: Joi.boolean().optional(),
-    strictSession: Joi.boolean().optional()
+    strictSession: Joi.boolean().optional(),
+    allowStreaming: Joi.boolean().optional()
 });
 
 export class Client {
     public static readonly DEFAULT_SETTINGS: Settings = {
         reusableDownloadKeys: true,
-        strictSession: false
+        strictSession: false,
+        allowStreaming: true
     };
 
     public readonly id: string;
@@ -153,6 +156,36 @@ export class Client {
         })));
 
         this.files.push(...files);
+    }
+
+    public requestStream(
+        fileId: string,
+        streamId: string,
+        streamKey: string,
+        range: [number, number] | null
+    ): void {
+        const file = this.files.find(value => value.id === fileId);
+
+        if (file) {
+            this.sendMessage('stream-request', {
+                streamKey, streamId, fileId, range
+            });
+
+            log('request-stream', {
+                userId: this.id,
+                streamKey,
+                streamId,
+                fileId
+            }, LogLevel.DEBUG);
+        } else {
+            log('request-stream-failed', {
+                reason: 'Requested file does not exist any longer',
+                userId: this.id,
+                streamKey,
+                streamId,
+                fileId
+            }, LogLevel.WARNING);
+        }
     }
 
     public requestFile(

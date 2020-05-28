@@ -13,8 +13,14 @@ type TransferEvent = SessionEvent & {downloadId: string; fileId: string};
 type TransferEventFailed = SessionEventFailed & {downloadId: string; fileId: string};
 type CreateSession = SessionEvent & {userAgent: string}
 
-/* ===== UPLOAD EVENTS ===== */
-type UploadEventFailed = Error & {downloadId: string};
+type StreamData = {streamKey: string; streamId: string};
+type StreamEvent = SessionEvent & StreamData & {fileId: string};
+type StreamEventFailed = SessionEventFailed & StreamData & {fileId: string};
+
+/* ===== UPLOAD / STREAM EVENTS ===== */
+type UploadTransferEventFailed = Error & {downloadId: string};
+type UploadStreamEventFailed = Error & {streamId: string};
+
 
 /* ===== SYSTEM EVENTS ===== */
 export type BootEvent = {message: string};
@@ -34,6 +40,9 @@ export type Events = {
     'remove-file': SessionEvent;
     'remove-file-failed': SessionEventFailed;
     'upload-failed': TransferEventFailed;
-    'accept-upload-failed': UploadEventFailed;
-    'cancel-upload-failed': UploadEventFailed;
+    'accept-upload-failed': UploadTransferEventFailed;
+    'cancel-upload-failed': UploadTransferEventFailed;
+    'accept-stream-failed': UploadStreamEventFailed;
+    'request-stream': StreamEvent;
+    'request-stream-failed': StreamEventFailed;
 }

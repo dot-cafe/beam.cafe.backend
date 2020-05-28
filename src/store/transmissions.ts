@@ -5,7 +5,7 @@ import {uid}                              from '../utils/uid';
 import {Client}                           from './Client';
 import {Transmission, TransmissionStatus} from './Transmission';
 
-type DownloadRedirect = {
+type TransmissionRedirect = {
     timeout: number;
     fileId: string;
 }
@@ -18,7 +18,7 @@ export const transmissions = new class extends Set<Transmission> {
      * download attempts by the browser in case the user cancelled the download.
      * These are only valid for 1 minute.
      */
-    private readonly redirects: Map<string, DownloadRedirect> = new Map();
+    private readonly redirects: Map<string, TransmissionRedirect> = new Map();
 
     public byId(id: string): Transmission | null {
         for (const item of this) {
@@ -38,7 +38,7 @@ export const transmissions = new class extends Set<Transmission> {
         return [...this].filter(value => value.file.id === id);
     }
 
-    public createDownloadKey(fileId: string): string {
+    public createTransmissionKey(fileId: string): string {
         const downloadId = uid(64);
 
         this.redirects.set(downloadId, {
@@ -51,7 +51,11 @@ export const transmissions = new class extends Set<Transmission> {
         return downloadId;
     }
 
-    public removeDownloadKey(downloadId: string): boolean {
+    public checkTransmissionKey(downloadId: string): boolean {
+        return this.redirects.has(downloadId);
+    }
+
+    public removeTransmissionKey(downloadId: string): boolean {
         const item = this.redirects.get(downloadId);
 
         if (!item) {

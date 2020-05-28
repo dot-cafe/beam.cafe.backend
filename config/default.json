@@ -2,9 +2,11 @@
     "server": {
         "port": 8080,
         "api": "/",
-        "internalIdSize": 32
+        "internalIdSize": 32,
+        "mediaStreamChunkSize": 4096000
     },
     "security": {
+        "streamKeySize": 64,
         "downloadKeySize": 64,
         "downloadKeyMaxAge": 60000,
         "clientWebSocketConnectionTimeout": 900000,
