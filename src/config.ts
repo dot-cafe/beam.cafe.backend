@@ -13,6 +13,7 @@ type Config = {
     };
 
     security: {
+        streamKeySize: number;
         downloadKeySize: number;
         downloadKeyMaxAge: number;
         clientWebSocketConnectionTimeout: number;

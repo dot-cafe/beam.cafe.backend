@@ -6,6 +6,7 @@
         "mediaStreamChunkSize": 4096000
     },
     "security": {
+        "streamKeySize": 64,
         "downloadKeySize": 64,
         "downloadKeyMaxAge": 60000,
         "clientWebSocketConnectionTimeout": 900000,
