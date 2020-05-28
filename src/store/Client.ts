@@ -13,17 +13,20 @@ import {transmissions}    from './transmissions';
 type Settings = {
     reusableDownloadKeys: boolean;
     strictSession: boolean;
+    allowStreaming: boolean;
 }
 
 export const ClientSettings = Joi.object({
     reusableDownloadKeys: Joi.boolean().optional(),
-    strictSession: Joi.boolean().optional()
+    strictSession: Joi.boolean().optional(),
+    allowStreaming: Joi.boolean().optional()
 });
 
 export class Client {
     public static readonly DEFAULT_SETTINGS: Settings = {
         reusableDownloadKeys: true,
-        strictSession: false
+        strictSession: false,
+        allowStreaming: true
     };
 
     public readonly id: string;

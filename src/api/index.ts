@@ -1,10 +1,12 @@
 import {Router}        from 'express';
 import {TEMPLATES}     from '../constants';
+import {Client}        from '../store/Client';
 import {clients}       from '../store/clients';
 import {Stream}        from '../store/Stream';
 import {streams}       from '../store/streams';
 import {Transmission}  from '../store/Transmission';
 import {transmissions} from '../store/transmissions';
+import {HostedFile}    from '../types';
 import {renderEJS}     from '../utils/render-ejs';
 
 export const api = (): Router => {
@@ -60,8 +62,8 @@ export const api = (): Router => {
         const {id, hash} = req.params;
         const resolved = clients.resolveFile(id);
 
-        // Validate provider
-        if (resolved) {
+        // Validate provider and check if streams are allowed by this user
+        if (resolved && !resolved[0].settings.allowStreaming) {
 
             // Check if download-hash is present
             if (hash) {
@@ -90,21 +92,21 @@ export const api = (): Router => {
     router.get('/d/:id', (req, res) => {
         const resolved = clients.resolveFile(req.params.id);
         let template = TEMPLATES.DOWNLOAD_NOT_FOUND;
-        let file: unknown = null;
+        let file: HostedFile | null = null;
+        let user: Client | null = null;
 
         if (resolved) {
-            const [user, resolvedFile] = resolved;
+            [user, file] = resolved;
 
             // Change template if user is offline
             if (user.disconnected) {
                 template = TEMPLATES.DOWNLOAD_OFFLINE;
             } else {
                 template = TEMPLATES.DOWNLOAD;
-                file = resolvedFile;
             }
         }
 
-        renderEJS(template, res, {file});
+        renderEJS(template, res, {file, user});
     });
 
     return router;
