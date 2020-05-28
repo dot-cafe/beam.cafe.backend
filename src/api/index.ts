@@ -63,7 +63,7 @@ export const api = (): Router => {
         const resolved = clients.resolveFile(id);
 
         // Validate provider and check if streams are allowed by this user
-        if (resolved && !resolved[0].settings.allowStreaming) {
+        if (resolved && resolved[0].settings.allowStreaming) {
 
             // Check if download-hash is present
             if (hash) {
@@ -105,6 +105,7 @@ export const api = (): Router => {
             }
         }
 
+        // TODO: Response code?
         renderEJS(template, res, {file, user});
     });
 
