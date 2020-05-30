@@ -74,7 +74,7 @@ export const transmissions = new class extends Collection<Transmission> {
             log('accept-upload-failed', {
                 reason: 'Upload already active.',
                 downloadId
-            }, LogLevel.INFO);
+            }, LogLevel.WARNING);
             return false;
         }
 

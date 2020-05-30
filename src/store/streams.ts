@@ -32,24 +32,22 @@ export const streams = new class extends Collection<Stream> {
         uploaderRequest: Request,
         uploaderResponse: Response,
         streamId: string
-    ): boolean {
+    ): 1 | 0 | -1 {
         const stream = this.findItemById(streamId);
 
         if (!stream) {
-            log('accept-stream-failed', {
-                reason: 'Stream not found.',
-                streamId
-            }, LogLevel.INFO);
-            return false;
+
+            // It's ok. The peer cancelled the stream before it was processed.
+            return -1;
         } else if (stream.status !== StreamStatus.Pending) {
             log('accept-stream-failed', {
                 reason: 'Stream already active.',
                 streamId
-            }, LogLevel.INFO); // TODO: That's an error
-            return false;
+            }, LogLevel.WARNING);
+            return 0;
         }
 
         stream.accept(uploaderRequest, uploaderResponse);
-        return true;
+        return 1;
     }
 };

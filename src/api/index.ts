@@ -21,11 +21,19 @@ export const api = (): Router => {
     });
 
     router.post('/stream/:id', (req, res) => {
-        if (streams.acceptTransfer(req, res, req.params.id)) {
-            return;
-        }
+        switch (streams.acceptTransfer(req, res, req.params.id)) {
 
-        res.sendStatus(400);
+            // Stream cancalled
+            case -1: {
+                res.sendStatus(204);
+                break;
+            }
+
+            // Invalid - request already in progress
+            case 0: {
+                res.sendStatus(400);
+            }
+        }
     });
 
     router.get('/file/:id/:hash?', (req, res) => {

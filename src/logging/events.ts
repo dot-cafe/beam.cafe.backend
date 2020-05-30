@@ -39,7 +39,6 @@ export type Events = {
     'request-upload-failed': TransferEventFailed;
     'remove-file': SessionEvent;
     'remove-file-failed': SessionEventFailed;
-    'upload-failed': TransferEventFailed;
     'accept-upload-failed': UploadTransferEventFailed;
     'cancel-upload-failed': UploadTransferEventFailed;
     'accept-stream-failed': UploadStreamEventFailed;

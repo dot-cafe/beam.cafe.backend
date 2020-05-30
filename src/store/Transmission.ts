@@ -1,5 +1,4 @@
 import {Request, Response} from 'express';
-import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
 import {uid}               from '../utils/uid';
 import {Client}            from './Client';
@@ -73,16 +72,6 @@ export class Transmission {
         uploaderRequest: Request,
         uploaderResponse: Response
     ): void {
-        if (this.status !== TransmissionStatus.Pending) {
-            log('upload-failed', {
-                reason: 'Upload rejected because the download is not in a pending state.',
-                downloadId: this.id,
-                fileId: this.file.id,
-                userId: this.provider.id
-            }, LogLevel.ERROR);
-            return;
-        }
-
         const {downloaderResponse} = this;
         this.status = TransmissionStatus.Active;
         if (!this.headersSent) {

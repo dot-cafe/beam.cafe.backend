@@ -1,6 +1,5 @@
 import {Request, Response}                     from 'express';
 import mime                                    from 'mime-types';
-import {log, LogLevel}                         from '../logging';
 import {HostedFile}                            from '../types';
 import {ByteRangeHeader, parseByteRangeHeader} from '../utils/parseByteRangeHeader';
 import {uid}                                   from '../utils/uid';
@@ -75,17 +74,6 @@ export class Stream {
         uploaderRequest: Request,
         uploaderResponse: Response
     ): void {
-        if (this.status !== StreamStatus.Pending) {
-
-            log('upload-failed', {
-                reason: 'Upload rejected because the download is not in a pending state.',
-                downloadId: this.id,
-                fileId: this.file.id,
-                userId: this.provider.id
-            }, LogLevel.ERROR);
-            return;
-        }
-
         const {downloaderResponse, range, file} = this;
         this.status = StreamStatus.Streaming;
 
