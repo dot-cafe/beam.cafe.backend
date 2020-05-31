@@ -224,12 +224,9 @@ export class Client {
         }
     }
 
-    public removeFile(id: string | unknown): void {
-        if (typeof id !== 'string') {
-            return;
-        }
-
+    public removeFile(id: string): void {
         const file = this.files.find(value => value.id === id);
+
         if (file) {
 
             // Cancel downloads associated with it

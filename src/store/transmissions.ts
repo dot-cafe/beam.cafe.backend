@@ -82,11 +82,7 @@ export const transmissions = new class extends Collection<Transmission> {
         return true;
     }
 
-    public cancelUpload(downloadId: unknown): boolean {
-        if (typeof downloadId !== 'string') {
-            return false;
-        }
-
+    public cancelUpload(downloadId: string): boolean {
         const download = this.findItemById(downloadId);
         if (download) {
             download.cancel();

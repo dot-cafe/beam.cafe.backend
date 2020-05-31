@@ -52,20 +52,38 @@ export function handleAction(
             client.createSession();
             break;
         }
-        case 'download-keys': {
+        case 'register-files': {
             client.acceptFiles(payload);
             break;
         }
-        case 'cancel-request': {
-            transmissions.cancelUpload(payload);
+        case 'cancel-requests': {
+            if (Array.isArray(payload)) {
+                for (const key of payload) {
+                    if (typeof key === 'string') {
+                        transmissions.cancelUpload(key);
+                    }
+                }
+            }
             break;
         }
-        case 'cancel-stream': {
-            streams.removeStreamKey(payload);
+        case 'cancel-streams': {
+            if (Array.isArray(payload)) {
+                for (const key of payload) {
+                    if (typeof key === 'string') {
+                        streams.removeStreamKey(key);
+                    }
+                }
+            }
             break;
         }
-        case 'remove-file': {
-            client.removeFile(payload);
+        case 'remove-files': {
+            if (Array.isArray(payload)) {
+                for (const key of payload) {
+                    if (typeof key === 'string') {
+                        client.removeFile(key);
+                    }
+                }
+            }
             break;
         }
         case 'bulk': {
