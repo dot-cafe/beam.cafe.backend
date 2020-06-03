@@ -25,7 +25,7 @@ export const streams = new class extends Collection<Stream> {
     }
 
     public byClient(client: Client): Array<Stream> {
-        return this.filter(value => value.provider === client);
+        return super.filter(value => value.provider === client);
     }
 
     public acceptTransfer(
@@ -33,7 +33,7 @@ export const streams = new class extends Collection<Stream> {
         uploaderResponse: Response,
         streamId: string
     ): 1 | 0 | -1 {
-        const stream = this.findItemById(streamId);
+        const stream = super.findItemById(streamId);
 
         if (!stream) {
 

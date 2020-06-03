@@ -21,11 +21,11 @@ export const transmissions = new class extends Collection<Transmission> {
     private readonly redirects: Map<string, TransmissionRedirect> = new Map();
 
     public byClient(client: Client): Array<Transmission> {
-        return this.filter(value => value.provider === client);
+        return super.filter(value => value.provider === client);
     }
 
     public byFileId(id: string): Array<Transmission> {
-        return this.filter(value => value.file.id === id);
+        return super.filter(value => value.file.id === id);
     }
 
     public createTransmissionKey(fileId: string): string {
@@ -62,7 +62,7 @@ export const transmissions = new class extends Collection<Transmission> {
         uploaderResponse: Response,
         downloadId: string
     ): boolean {
-        const download = this.findItemById(downloadId);
+        const download = super.findItemById(downloadId);
 
         if (!download) {
             log('accept-upload-failed', {
@@ -83,7 +83,7 @@ export const transmissions = new class extends Collection<Transmission> {
     }
 
     public cancelUpload(downloadId: string): boolean {
-        const download = this.findItemById(downloadId);
+        const download = super.findItemById(downloadId);
         if (download) {
             download.cancel();
             return true;
