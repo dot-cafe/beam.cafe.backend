@@ -4,6 +4,7 @@ import * as WebSocket     from 'ws';
 import {config}           from '../config';
 import {log, LogLevel}    from '../logging';
 import {HostedFile}       from '../types';
+import {CollectionItem}   from '../utils/db/CollectionItem';
 import {decryptUserAgent} from '../utils/decrypt-user-agent';
 import {typeOf}           from '../utils/type-of';
 import {uid}              from '../utils/uid';
@@ -22,14 +23,13 @@ export const ClientSettings = Joi.object({
     allowStreaming: Joi.boolean().optional()
 });
 
-export class Client {
+export class Client extends CollectionItem {
     public static readonly DEFAULT_SETTINGS: Settings = {
         reusableDownloadKeys: true,
         strictSession: false,
         allowStreaming: true
     };
 
-    public readonly id: string;
     public readonly files: Array<HostedFile>;
     public readonly settings: Settings;
     public readonly userAgent: string;
@@ -41,7 +41,7 @@ export class Client {
     private timeoutTimestamp = 0;
 
     constructor(socket: WebSocket, req: Request) {
-        this.id = uid(config.server.internalIdSize);
+        super();
         this.files = [];
         this.socket = socket;
         this.sessionKey = null;

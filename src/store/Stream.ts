@@ -1,8 +1,8 @@
 import {Request, Response}                     from 'express';
 import mime                                    from 'mime-types';
 import {HostedFile}                            from '../types';
+import {CollectionItem}                        from '../utils/db/CollectionItem';
 import {ByteRangeHeader, parseByteRangeHeader} from '../utils/parseByteRangeHeader';
-import {uid}                                   from '../utils/uid';
 import {Client}                                from './Client';
 import {streams}                               from './streams';
 
@@ -17,10 +17,9 @@ export enum StreamStatus {
     Cancelled = 'Cancelled'
 }
 
-export class Stream {
+export class Stream extends CollectionItem {
     public readonly hadRange: boolean;
     public readonly range: ByteRangeHeader;
-    public readonly id: string;
     public readonly file: HostedFile;
     public readonly provider: Client;
 
@@ -40,11 +39,11 @@ export class Stream {
         file: HostedFile,
         streamKey: string
     ) {
+        super();
         this.downloaderRequest = downloaderRequest;
         this.downloaderResponse = downloaderResponse;
         this.provider = fileProvider;
         this.file = file;
-        this.id = uid();
 
         // Add to downloads and initiate transfer
         streams.add(this);

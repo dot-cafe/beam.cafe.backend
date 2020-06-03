@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import {HostedFile}        from '../types';
-import {uid}               from '../utils/uid';
+import {CollectionItem}    from '../utils/db/CollectionItem';
 import {Client}            from './Client';
 import {transmissions}     from './transmissions';
 
@@ -16,8 +16,7 @@ export enum TransmissionStatus {
     PeerReset = 'PeerReset',
 }
 
-export class Transmission {
-    public readonly id: string;
+export class Transmission extends CollectionItem {
     public readonly file: HostedFile;
     public readonly provider: Client;
 
@@ -43,11 +42,11 @@ export class Transmission {
         fileProvider: Client,
         file: HostedFile
     ) {
+        super();
         this.downloaderRequest = downloaderRequest;
         this.downloaderResponse = downloaderResponse;
         this.provider = fileProvider;
         this.file = file;
-        this.id = uid();
 
         // Add to downloads and initiate transfer
         transmissions.add(this);
