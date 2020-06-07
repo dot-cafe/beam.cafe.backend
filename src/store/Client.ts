@@ -1,15 +1,16 @@
-import Joi                from '@hapi/joi';
-import {Request}          from 'express';
-import * as WebSocket     from 'ws';
-import {config}           from '../config';
-import {log, LogLevel}    from '../logging';
-import {HostedFile}       from '../types';
-import {CollectionItem}   from '../utils/db/CollectionItem';
-import {decryptUserAgent} from '../utils/decrypt-user-agent';
-import {typeOf}           from '../utils/type-of';
-import {uid}              from '../utils/uid';
-import {clients}          from './clients';
-import {transmissions}    from './transmissions';
+import Joi                 from '@hapi/joi';
+import {Request}           from 'express';
+import * as WebSocket      from 'ws';
+import {config}            from '../config';
+import {log, LogLevel}     from '../logging';
+import {HostedFile}        from '../types';
+import {CollectionItem}    from '../utils/db/CollectionItem';
+import {decryptUserAgent}  from '../utils/decrypt-user-agent';
+import {serializeFilename} from '../utils/serializeFileName';
+import {typeOf}            from '../utils/type-of';
+import {uid}               from '../utils/uid';
+import {clients}           from './clients';
+import {transmissions}     from './transmissions';
 
 type Settings = {
     reusableDownloadKeys: boolean;
@@ -144,6 +145,7 @@ export class Client extends CollectionItem {
 
                 files.push({
                     id: uid(),
+                    serializedName: serializeFilename(file.name),
                     name: file.name,
                     size: file.size
                 });
@@ -152,7 +154,8 @@ export class Client extends CollectionItem {
 
         this.sendMessage('file-registrations', files.map(value => ({
             id: value.id,
-            name: value.name
+            name: value.name,
+            serializedName: value.serializedName
         })));
 
         this.files.push(...files);

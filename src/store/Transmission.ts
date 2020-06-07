@@ -83,7 +83,7 @@ export class Transmission extends CollectionItem {
             downloaderResponse.set('Content-Length', String(this.file.size));
             downloaderResponse.set('Content-Type', 'application/octet-stream');
             downloaderResponse.set('Transfer-Encoding', 'chunked');
-            downloaderResponse.attachment(this.file.name);
+            downloaderResponse.attachment(this.file.serializedName);
             this.headersSent = true;
         }
 
