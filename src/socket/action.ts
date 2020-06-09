@@ -56,6 +56,10 @@ export function handleAction(
             client.registerFiles(payload);
             break;
         }
+        case 'refresh-files': {
+            client.refreshFiles(payload);
+            break;
+        }
         case 'cancel-requests': {
             if (Array.isArray(payload)) {
                 for (const key of payload) {

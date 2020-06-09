@@ -27,7 +27,7 @@ export function handleRequest(
             break;
         }
         case 'reset-keys': {
-            client.refreshKeys();
+            client.refreshAllFiles();
             respondTo(client, id, true);
             break;
         }

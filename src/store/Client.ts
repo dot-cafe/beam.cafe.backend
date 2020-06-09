@@ -17,16 +17,18 @@ type Settings = {
     allowStreaming: boolean;
 }
 
-export const ClientSettingsSchema = Joi.object({
+const ClientSettingsSchema = Joi.object({
     reusableDownloadKeys: Joi.boolean().optional(),
     strictSession: Joi.boolean().optional(),
     allowStreaming: Joi.boolean().optional()
 });
 
-export const FileListSchema = Joi.array().items(Joi.object({
+const FileListSchema = Joi.array().items(Joi.object({
     name: Joi.string().required(),
     size: Joi.number().required()
 }));
+
+const IDListSchema = Joi.array().items(Joi.string());
 
 export class Client extends CollectionItem {
     public static readonly DEFAULT_SETTINGS: Settings = {
@@ -136,36 +138,34 @@ export class Client extends CollectionItem {
     public registerFiles(incomingFiles: any): void {
         if (FileListSchema.validate(incomingFiles).error) {
             log('invalid-payload', {
-                location: 'file-register'
+                location: 'refresh-files'
             }, LogLevel.WARNING);
             return;
         }
 
-        const files: Array<Partial<HostedFile>> = [];
+        const files: Array<HostedFile> = [];
         for (const file of incomingFiles) {
             const {name, size} = file;
-            let newFile = this.files.find(value => value.name === name);
 
-            if (!newFile) {
-                newFile = {
-                    id: uid(),
-                    serializedName: serializeFilename(name),
-                    name, size
-                };
+            if (this.files.find(value => value.name === name)) {
 
-                this.files.push(newFile);
-            } else {
-                newFile.id = uid();
+                // TODO: WHAT NOW???
+                continue;
             }
 
             files.push({
-                id: newFile.id,
-                name: newFile.name,
-                serializedName: newFile.serializedName
+                id: uid(),
+                serializedName: serializeFilename(name),
+                name, size
             });
         }
 
-        this.sendMessage('file-registrations', files);
+        this.files.push(...files);
+        this.sendMessage('register-files', files.map(v => ({
+            id: v.id,
+            name: v.name,
+            serializedName: v.serializedName
+        })));
     }
 
     public requestStream(
@@ -211,12 +211,13 @@ export class Client extends CollectionItem {
 
             // Refresh key of this file
             if (!this.settings.reusableDownloadKeys) {
-                file.id = uid();
-
-                this.sendMessage('file-registrations', [{
+                const newId = uid();
+                this.sendMessage('refresh-files', [{
                     id: file.id,
-                    name: file.name
+                    newId
                 }]);
+
+                file.id = newId;
             }
 
             log('request-upload', {
@@ -252,27 +253,64 @@ export class Client extends CollectionItem {
         }
     }
 
-    public refreshKeys(): void {
+    public refreshFiles(ids: any): void {
+        if (IDListSchema.validate(ids).error) {
+            log('invalid-payload', {
+                location: 'register-files'
+            }, LogLevel.WARNING);
+            return;
+        }
+
+        // Generate new keys
+        const files: Array<unknown> = [];
+        for (const id of ids) {
+            const file = this.files.find(v => v.id === id);
+
+            if (file) {
+
+                // Cancel all downloads
+                for (const download of transmissions.byFileId(file.id)) {
+                    download.cancel();
+                }
+
+                // Refresh key
+                const newId = uid();
+                files.push({
+                    id: file.id,
+                    newId
+                });
+
+                file.id = newId;
+            }
+        }
+
+        this.sendMessage('refresh-files', files);
+    }
+
+    public refreshAllFiles(): void {
 
         // Cancel all downloads
         for (const download of transmissions.byClient(this)) {
             download.cancel();
         }
 
-        // Generate new keys
         const files: Array<unknown> = [];
         for (const file of this.files) {
-            const newId = uid();
-            file.id = newId;
 
+            // Refresh key
+
+            const newId = uid();
             files.push({
-                id: newId,
-                name: file.name
+                id: file.id,
+                newId
             });
+
+            file.id = newId;
         }
 
-        this.sendMessage('file-registrations', files);
+        this.sendMessage('refresh-files', files);
     }
+
 
     public applySetting<K extends keyof Settings>(key: K, value: Settings[K]): boolean {
         if (key in Client.DEFAULT_SETTINGS) {

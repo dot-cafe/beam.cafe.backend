@@ -1,7 +1,7 @@
 type Error = {reason: string};
 
 /* ===== API EVENTS ===== */
-type InvalidPayload = {location: 'settings' | 'ws' | 'file-register'} | {
+type InvalidPayload = {location: 'settings' | 'ws' | 'register-files' | 'refresh-files'} | {
     location: 'ws-request' | 'ws-action';
     action: string;
 };
