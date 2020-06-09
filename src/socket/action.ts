@@ -53,7 +53,7 @@ export function handleAction(
             break;
         }
         case 'register-files': {
-            client.acceptFiles(payload);
+            client.registerFiles(payload);
             break;
         }
         case 'cancel-requests': {

@@ -7,7 +7,6 @@ import {HostedFile}        from '../types';
 import {CollectionItem}    from '../utils/db/CollectionItem';
 import {decryptUserAgent}  from '../utils/decrypt-user-agent';
 import {serializeFilename} from '../utils/serializeFileName';
-import {typeOf}            from '../utils/type-of';
 import {uid}               from '../utils/uid';
 import {clients}           from './clients';
 import {transmissions}     from './transmissions';
@@ -18,11 +17,16 @@ type Settings = {
     allowStreaming: boolean;
 }
 
-export const ClientSettings = Joi.object({
+export const ClientSettingsSchema = Joi.object({
     reusableDownloadKeys: Joi.boolean().optional(),
     strictSession: Joi.boolean().optional(),
     allowStreaming: Joi.boolean().optional()
 });
+
+export const FileListSchema = Joi.array().items(Joi.object({
+    name: Joi.string().required(),
+    size: Joi.number().required()
+}));
 
 export class Client extends CollectionItem {
     public static readonly DEFAULT_SETTINGS: Settings = {
@@ -129,36 +133,39 @@ export class Client extends CollectionItem {
         return false;
     }
 
-    public acceptFiles(incomingFiles: unknown): void {
-        const files: Array<HostedFile> = [];
-
-        if (!Array.isArray(incomingFiles)) {
+    public registerFiles(incomingFiles: any): void {
+        if (FileListSchema.validate(incomingFiles).error) {
+            log('invalid-payload', {
+                location: 'file-register'
+            }, LogLevel.WARNING);
             return;
         }
 
+        const files: Array<Partial<HostedFile>> = [];
         for (const file of incomingFiles) {
-            if (
-                typeOf(file) === 'object' &&
-                typeof file.name === 'string' &&
-                typeof file.size === 'number'
-            ) {
+            const {name, size} = file;
+            let newFile = this.files.find(value => value.name === name);
 
-                files.push({
+            if (!newFile) {
+                newFile = {
                     id: uid(),
-                    serializedName: serializeFilename(file.name),
-                    name: file.name,
-                    size: file.size
-                });
+                    serializedName: serializeFilename(name),
+                    name, size
+                };
+
+                this.files.push(newFile);
+            } else {
+                newFile.id = uid();
             }
+
+            files.push({
+                id: newFile.id,
+                name: newFile.name,
+                serializedName: newFile.serializedName
+            });
         }
 
-        this.sendMessage('file-registrations', files.map(value => ({
-            id: value.id,
-            name: value.name,
-            serializedName: value.serializedName
-        })));
-
-        this.files.push(...files);
+        this.sendMessage('file-registrations', files);
     }
 
     public requestStream(
@@ -277,7 +284,7 @@ export class Client extends CollectionItem {
     }
 
     public applySettings(settings: unknown): boolean {
-        if (!ClientSettings.validate(settings)) {
+        if (ClientSettingsSchema.validate(settings).error) {
             log('invalid-payload', {
                 location: 'settings'
             }, LogLevel.ERROR);
