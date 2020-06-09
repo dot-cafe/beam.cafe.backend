@@ -4,8 +4,8 @@ import {Client}        from '../store/Client';
 import {clients}       from '../store/clients';
 import {streams}       from '../store/streams';
 import {transmissions} from '../store/transmissions';
-import {typeOf}        from '../utils/type-of';
 import {handleRequest} from './request';
+import {validation}    from './validation';
 
 /**
  * Handles incoming messages.
@@ -17,35 +17,36 @@ export function handleAction(
     data: unknown,
     ws: WebSocket
 ): Client {
-    if (typeOf(data) !== 'object') {
+    const {error, value} = validation.ClientAction.validate(data);
+    if (error) {
+        log('validation-error', {error}, LogLevel.WARNING);
         return client;
     }
 
-    const {type, payload} = data as any;
-    if (typeof type !== 'string') {
-        log('invalid-payload', {
-            location: 'ws'
-        }, LogLevel.ERROR);
-        return client;
-    }
-
+    const {type, payload} = value;
     switch (type) {
         case 'request': {
             handleRequest(client, payload);
             break;
         }
         case 'restore-session': {
-            const oldClient = clients.restoreSession(payload, ws);
+            const {error, value} = validation.String.validate(payload);
 
-            if (oldClient) {
+            if (error) {
+                log('validation-error', {error}, LogLevel.WARNING);
+            } else {
+                const oldClient = clients.restoreSession(value, ws);
 
-                // Remove current client and use new one
-                clients.delete(client);
-                return oldClient;
+                if (oldClient) {
+
+                    // Remove current client and use new one
+                    clients.delete(client);
+                    return oldClient;
+                }
+
+                // Create a fresh sessions, this will clear all states client-side
+                client.createSession();
             }
-
-            // Create a fresh sessions, this will clear all states client-side
-            client.createSession();
             break;
         }
         case 'create-session': {
@@ -53,11 +54,23 @@ export function handleAction(
             break;
         }
         case 'register-files': {
-            client.registerFiles(payload);
+            const {error, value} = validation.FileListSchema.validate(payload);
+
+            if (error) {
+                log('validation-error', {error}, LogLevel.WARNING);
+            } else {
+                client.registerFiles(value);
+            }
             break;
         }
         case 'refresh-files': {
-            client.refreshFiles(payload);
+            const {error, value} = validation.StringArray.validate(payload);
+
+            if (error) {
+                log('validation-error', {error}, LogLevel.WARNING);
+            } else {
+                client.refreshFiles(value);
+            }
             break;
         }
         case 'refresh-all-files': {
@@ -65,31 +78,37 @@ export function handleAction(
             break;
         }
         case 'cancel-requests': {
-            if (Array.isArray(payload)) {
-                for (const key of payload) {
-                    if (typeof key === 'string') {
-                        transmissions.cancelUpload(key);
-                    }
+            const {error, value} = validation.StringArray.validate(payload);
+
+            if (error) {
+                log('validation-error', {error}, LogLevel.WARNING);
+            } else {
+                for (const key of value) {
+                    transmissions.cancelUpload(key);
                 }
             }
             break;
         }
         case 'cancel-streams': {
-            if (Array.isArray(payload)) {
-                for (const key of payload) {
-                    if (typeof key === 'string') {
-                        streams.removeStreamKey(key);
-                    }
+            const {error, value} = validation.StringArray.validate(payload);
+
+            if (error) {
+                log('validation-error', {error}, LogLevel.WARNING);
+            } else {
+                for (const key of value) {
+                    streams.removeStreamKey(key);
                 }
             }
             break;
         }
         case 'remove-files': {
-            if (Array.isArray(payload)) {
-                for (const key of payload) {
-                    if (typeof key === 'string') {
-                        client.removeFile(key);
-                    }
+            const {error, value} = validation.StringArray.validate(payload);
+
+            if (error) {
+                log('validation-error', {error}, LogLevel.WARNING);
+            } else {
+                for (const key of value) {
+                    client.removeFile(key);
                 }
             }
             break;
@@ -110,7 +129,7 @@ export function handleAction(
         default: {
             log('invalid-payload', {
                 location: 'ws-action',
-                action: type
+                description: `Invalid type "${type}"`
             }, LogLevel.ERROR);
         }
     }

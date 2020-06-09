@@ -29,11 +29,7 @@ export const clients = new class extends Collection<Client> {
         return super.delete(client);
     }
 
-    public resolveFile(id: string | unknown): [Client, HostedFile] | null {
-        if (typeof id !== 'string') {
-            return null;
-        }
-
+    public resolveFile(id: string): [Client, HostedFile] | null {
         for (const client of this) {
             for (const file of client.files) {
                 if (file.id === id) {
@@ -45,10 +41,7 @@ export const clients = new class extends Collection<Client> {
         return null;
     }
 
-    public restoreSession(key: unknown, newSocket: WebSocket): Client | null {
-        if (typeof key !== 'string') {
-            return null;
-        }
+    public restoreSession(key: string, newSocket: WebSocket): Client | null {
 
         // Find client with the corresponding session-key
         for (const client of this) {

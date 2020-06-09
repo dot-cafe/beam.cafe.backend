@@ -4,7 +4,6 @@ import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
 import {handleAction}  from './action';
 
-/* eslint-disable no-console */
 export const acceptClient = (ws: WebSocket, req: Request): void => {
     let client = new Client(ws, req);
 
@@ -20,7 +19,9 @@ export const acceptClient = (ws: WebSocket, req: Request): void => {
             client = handleAction(client, JSON.parse(message), ws);
         } catch (e) {
             log('invalid-payload', {
-                location: 'ws'
+                location: 'ws-entry',
+                description: 'Failed to parse JSON body',
+                error: e
             }, LogLevel.ERROR);
         }
     });

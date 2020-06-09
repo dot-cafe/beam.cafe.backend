@@ -1,10 +1,16 @@
+import Joi from '@hapi/joi';
+
 type Error = {reason: string};
 
 /* ===== API EVENTS ===== */
-type InvalidPayload = {location: 'settings' | 'ws' | 'register-files' | 'refresh-files'} | {
-    location: 'ws-request' | 'ws-action';
-    action: string;
+type InvalidPayload = {
+    location: 'ws-entry' | 'ws-request' | 'ws-action';
+    description: string;
+    error?: Error;
 };
+
+// Used for Joi validations
+type ValidationError = {error: Joi.ValidationError};
 
 /* ===== USER EVENTS ===== */
 type SessionEvent = {userId: string};
@@ -27,6 +33,7 @@ export type BootEvent = {message: string};
 export type ProcessExit = Error & {cause: string};
 
 export type Events = {
+    'validation-error': ValidationError;
     'booting': BootEvent;
     'process-exit': ProcessExit;
     'invalid-payload': InvalidPayload;

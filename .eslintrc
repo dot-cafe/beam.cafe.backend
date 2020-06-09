@@ -21,8 +21,6 @@
     "rules": {
         "no-multi-spaces": ["error", {"exceptions": {"ImportDeclaration": true}}],
         "align-import/align-import": "error",
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/explicit-module-boundary-types": "off",
         "new-cap": "off"
     }
 }

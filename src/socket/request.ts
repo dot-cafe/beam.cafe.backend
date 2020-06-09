@@ -1,6 +1,6 @@
 import {log, LogLevel} from '../logging';
 import {Client}        from '../store/Client';
-import {typeOf}        from '../utils/type-of';
+import {validation}    from './validation';
 
 const respondTo = (client: Client, id: string, ok: boolean, data: unknown = null): void =>
     client.sendMessage('response', {id, ok, data});
@@ -9,21 +9,26 @@ export function handleRequest(
     client: Client,
     request: unknown
 ): void {
-    if (
-        typeOf(request) !== 'object' ||
-        typeof (request as any).id !== 'string' ||
-        typeof (request as any).type !== 'string'
-    ) {
-        log('invalid-payload', {
-            location: 'ws'
-        }, LogLevel.ERROR);
+    const {error, value} = validation.ClientRequest.validate(request);
+
+    if (error) {
+        log('validation-error', {error}, LogLevel.WARNING);
         return;
     }
 
-    const {id, data, type} = request as any;
+    const {id, data, type} = value;
     switch (type) {
         case 'settings': {
-            respondTo(client, id, client.applySettings(data));
+            const {error, value} = validation.ClientSettings.validate(data);
+
+            if (error) {
+                log('validation-error', {error}, LogLevel.WARNING);
+                respondTo(client, id, false);
+            } else {
+                client.applySettings(value);
+                respondTo(client, id, true);
+            }
+
             break;
         }
         default: {
@@ -31,7 +36,7 @@ export function handleRequest(
 
             log('invalid-payload', {
                 location: 'ws-request',
-                action: type
+                description: `Invalid type "${type}"`
             }, LogLevel.ERROR);
 
             break;

@@ -1,4 +1,3 @@
-import Joi                 from '@hapi/joi';
 import {Request}           from 'express';
 import * as WebSocket      from 'ws';
 import {config}            from '../config';
@@ -16,19 +15,6 @@ type Settings = {
     strictSession: boolean;
     allowStreaming: boolean;
 }
-
-const ClientSettingsSchema = Joi.object({
-    reusableDownloadKeys: Joi.boolean().optional(),
-    strictSession: Joi.boolean().optional(),
-    allowStreaming: Joi.boolean().optional()
-});
-
-const FileListSchema = Joi.array().items(Joi.object({
-    name: Joi.string().required(),
-    size: Joi.number().required()
-}));
-
-const IDListSchema = Joi.array().items(Joi.string());
 
 export class Client extends CollectionItem {
     public static readonly DEFAULT_SETTINGS: Settings = {
@@ -135,14 +121,9 @@ export class Client extends CollectionItem {
         return false;
     }
 
-    public registerFiles(incomingFiles: any): void {
-        if (FileListSchema.validate(incomingFiles).error) {
-            log('invalid-payload', {
-                location: 'refresh-files'
-            }, LogLevel.WARNING);
-            return;
-        }
-
+    public registerFiles(
+        incomingFiles: Array<{name: string, size: number}>
+    ): void {
         const files: Array<HostedFile> = [];
         for (const file of incomingFiles) {
             const {name, size} = file;
@@ -251,13 +232,7 @@ export class Client extends CollectionItem {
         }
     }
 
-    public refreshFiles(ids: any): void {
-        if (IDListSchema.validate(ids).error) {
-            log('invalid-payload', {
-                location: 'register-files'
-            }, LogLevel.WARNING);
-            return;
-        }
+    public refreshFiles(ids: Array<string>): void {
 
         // Generate new keys
         const files: Array<unknown> = [];
@@ -309,29 +284,8 @@ export class Client extends CollectionItem {
         this.sendMessage('refresh-files', files);
     }
 
-
-    public applySetting<K extends keyof Settings>(key: K, value: Settings[K]): boolean {
-        if (key in Client.DEFAULT_SETTINGS) {
-            this.settings[key] = value;
-            return true;
-        }
-
-        return false;
-    }
-
-    public applySettings(settings: unknown): boolean {
-        if (ClientSettingsSchema.validate(settings).error) {
-            log('invalid-payload', {
-                location: 'settings'
-            }, LogLevel.ERROR);
-            return false;
-        }
-
-        for (const [key, value] of Object.entries(settings as Record<string, unknown>)) {
-            this.applySetting(key as any, value);
-        }
-
-        return true;
+    public applySettings(settings: Partial<Settings>): void {
+        Object.assign(this.settings, settings);
     }
 
     public sendMessage(type: string, payload: unknown = null): void {
