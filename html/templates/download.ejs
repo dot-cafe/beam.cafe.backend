@@ -20,10 +20,10 @@
 </head>
 <body>
 
-<main>
-    <h3 aria-role="heading"><%= file.name %></h3>
+<main class="dialog">
+    <h1 aria-role="heading"><%= file.name %></h1>
     <% if (file.serializedName !== file.name) { %>
-        <h2>(<%= file.serializedName %>)</h2>
+        <h3>(<%= file.serializedName %>)</h3>
     <% } %>
 
     <section aria-role="heading">
@@ -57,20 +57,12 @@
     }
 
     main {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 1em 2em;
-        border-radius: 0.5em;
-        box-shadow: 0 0.2em 1em rgba(0, 0, 0, 0.15);
         background: var(--c-background-primary);
-        color: var(--c-text-secondary);
         max-width: 75vw;
-        animation: fadeIn 0.5s ease-in-out;
     }
 
-    main h2,
-    main h3 {
+    main h3,
+    main h1 {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -78,13 +70,13 @@
         margin: 0.5em 0 0;
     }
 
-    main h3 {
+    main h1 {
         font-size: 1.25em;
         color: var(--c-text-primary);
         max-width: 20em;
     }
 
-    main h2 {
+    main h3 {
         font-size: 0.75em;
         color: var(--c-text-primary-accent);
         max-width: 30em;

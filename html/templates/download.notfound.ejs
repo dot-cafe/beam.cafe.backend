@@ -8,13 +8,14 @@
     <title>Beam Cafe</title>
 
     <!-- Base styles -->
+    <style><%- include('../css/components.css') %></style>
     <style><%- include('../css/animations.css') %></style>
     <style><%- include('../css/theme.css') %></style>
     <style><%- include('../css/base.css') %></style>
 </head>
 <body>
 
-<main>
+<main class="dialog">
     <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30px" height="30px">
         <path d="M 13 3 C 7.4889941 3 3 7.4889982 3 13 C 3 18.511002 7.4889941 23 13 23 C 15.396509 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148985 17.597385 23 15.396507 23 13 C 23 7.4889982 18.511006 3 13 3 z M 13 5 C 17.430126 5 21 8.5698765 21 13 C 21 17.430123 17.430126 21 13 21 C 8.5698737 21 5 17.430123 5 13 C 5 8.5698765 8.5698737 5 13 5 z M 9.5 10 A 1.5 1.5 0 0 0 9.5 13 A 1.5 1.5 0 0 0 9.5 10 z M 16.5 10 A 1.5 1.5 0 0 0 16.5 13 A 1.5 1.5 0 0 0 16.5 10 z M 13 15 C 10.940666 15 9.4023437 16.197266 9.4023438 16.197266 A 1.000787 1.000787 0 1 0 10.597656 17.802734 C 10.597656 17.802734 11.745334 17 13 17 C 14.254666 17 15.402344 17.802734 15.402344 17.802734 A 1.000787 1.000787 0 1 0 16.597656 16.197266 C 16.597656 16.197266 15.059334 15 13 15 z"/>
     </svg>
@@ -30,15 +31,6 @@
     }
 
     main {
-        display: flex;
-        flex-direction: column;
-        padding: 1em 2em;
-        border-radius: 0.5em;
-        box-shadow: 0 0.2em 1em rgba(0, 0, 0, 0.15);
-        background: var(--c-background-primary);
-        color: var(--c-text-secondary);
-        max-width: 75vw;
-        animation: fadeIn 0.5s ease-in-out;
         background: var(--c-red);
         text-align: center;
         line-height: 1.75em;

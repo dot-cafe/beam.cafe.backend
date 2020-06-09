@@ -40,3 +40,15 @@
 .btn.green:focus {
     box-shadow: 0 0 0 2px var(--c-focus-border-green);
 }
+
+.dialog {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em 2em;
+    border-radius: 0.5em;
+    box-shadow: 0 0.2em 1em rgba(0, 0, 0, 0.15);
+    color: var(--c-text-secondary);
+    max-width: 75vw;
+    animation: fadeIn 0.5s ease-in-out;
+}
