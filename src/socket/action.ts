@@ -60,6 +60,10 @@ export function handleAction(
             client.refreshFiles(payload);
             break;
         }
+        case 'refresh-all-files': {
+            client.refreshAllFiles();
+            break;
+        }
         case 'cancel-requests': {
             if (Array.isArray(payload)) {
                 for (const key of payload) {

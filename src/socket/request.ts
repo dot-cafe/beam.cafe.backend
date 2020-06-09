@@ -26,11 +26,6 @@ export function handleRequest(
             respondTo(client, id, client.applySettings(data));
             break;
         }
-        case 'reset-keys': {
-            client.refreshAllFiles();
-            respondTo(client, id, true);
-            break;
-        }
         default: {
             respondTo(client, id, false);
 

@@ -148,8 +148,6 @@ export class Client extends CollectionItem {
             const {name, size} = file;
 
             if (this.files.find(value => value.name === name)) {
-
-                // TODO: WHAT NOW???
                 continue;
             }
 
