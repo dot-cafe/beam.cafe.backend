@@ -20,9 +20,11 @@
 </head>
 <body>
 
-<!-- TODO: File Preview? Integrated stream? -->
 <main>
     <h3 aria-role="heading"><%= file.name %></h3>
+    <% if (file.serializedName !== file.name) { %>
+        <h2>(<%= file.serializedName %>)</h2>
+    <% } %>
 
     <section aria-role="heading">
         <p>Size: <b><%= prettyBytes(file.size) %></b></p>
@@ -57,6 +59,7 @@
     main {
         display: flex;
         flex-direction: column;
+        align-items: center;
         padding: 1em 2em;
         border-radius: 0.5em;
         box-shadow: 0 0.2em 1em rgba(0, 0, 0, 0.15);
@@ -66,15 +69,25 @@
         animation: fadeIn 0.5s ease-in-out;
     }
 
+    main h2,
     main h3 {
-        font-size: 1.25em;
-        text-align: center;
-        color: var(--c-text-primary);
-        margin: 0.5em 0 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        text-align: center;
+        margin: 0.5em 0 0;
+    }
+
+    main h3 {
+        font-size: 1.25em;
+        color: var(--c-text-primary);
         max-width: 20em;
+    }
+
+    main h2 {
+        font-size: 0.75em;
+        color: var(--c-text-primary-accent);
+        max-width: 30em;
     }
 
     main section {
