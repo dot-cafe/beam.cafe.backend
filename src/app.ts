@@ -1,12 +1,14 @@
 import cors             from 'cors';
 import express          from 'express';
 import http             from 'http';
+import * as path        from 'path';
 import {api}            from './api';
 import {config}         from './config';
 import {log, LogLevel}  from './logging';
 import {wrapHTTPServer} from './socket';
 
 (async (): Promise<void> => {
+    const dev = process.env.NODE_ENV === 'development';
     const server = http.createServer();
     const app = express();
 
@@ -14,7 +16,7 @@ import {wrapHTTPServer} from './socket';
     app.disable('x-powered-by');
 
     // Enable cors during development
-    if (process.env.NODE_ENV === 'development') {
+    if (dev) {
         log('booting', {
             message: 'Starting app in development'
         }, LogLevel.INFO);
@@ -25,6 +27,10 @@ import {wrapHTTPServer} from './socket';
             message: 'Starting app in production'
         }, LogLevel.INFO);
     }
+
+    // Serve template assets
+    const templateAssets = path.resolve(__dirname, dev ? '../dist/ta' : '../ta');
+    app.use('/ta', express.static(templateAssets));
 
     // Register api
     app.use(config.server.api, api());

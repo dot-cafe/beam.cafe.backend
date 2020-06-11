@@ -5,20 +5,14 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <%- include('../partials/seo.ejs', {
+    <%- include('./partials/seo.ejs', {
     title: 'Something got beamed up for you!',
     description: `Click this link to download or stream "${file.name}" (${prettyBytes(file.size)})`
     }) %>
 
     <title><%= `Download "${file.name}"` %></title>
 
-    <!-- Base styles -->
-    <style><%- include('../css/components.css') %></style>
-    <style><%- include('../css/animations.css') %></style>
-    <style><%- include('../css/theme.css') %></style>
-    <style><%- include('../css/base.css') %></style>
-
-    <%- include('../web-components/bc-check-box.ejs') %>
+    <link rel="stylesheet" href="/ta/download.min.css">
 </head>
 <body>
 
@@ -56,128 +50,7 @@
     </div>
 </main>
 
-<script>
-    const userId = '<%= user.id %>';
-    const trustedUserKey = 'trusted-users';
-    const trustedUsers = JSON.parse(localStorage.getItem(trustedUserKey) || '[]');
-    const confirmStreamBox = document.querySelector('.confirm');
-    const confirmStreamCheckbox = document.querySelector('.confirm > bc-check-box');
-    const streamLink = document.querySelector('#stream-link');
-    let timeout = null;
-
-    streamLink.addEventListener('click', e => {
-
-        // User already approved this source
-        if (trustedUsers.includes(userId)) {
-            console.log(trustedUsers);
-            return;
-        }
-
-        // Check if user approved this source
-        if (!confirmStreamCheckbox.checked) {
-            e.preventDefault();
-
-            if (timeout !== null) {
-                clearTimeout(timeout);
-            }
-
-            confirmStreamBox.classList.add('flashing', 'visible');
-            timeout = setTimeout(() => {
-                confirmStreamBox.classList.remove('flashing');
-            }, 750);
-        } else {
-            localStorage.setItem(
-                trustedUserKey,
-                JSON.stringify([...trustedUsers, userId])
-            );
-        }
-    });
-</script>
-
-<style>
-    body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    main {
-        background: var(--c-background-primary);
-        max-width: 75vw;
-    }
-
-    main h3,
-    main h1 {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        text-align: center;
-        margin: 0.5em 0 0;
-    }
-
-    main h1 {
-        font-size: 1.25em;
-        color: var(--c-text-primary);
-        max-width: 20em;
-    }
-
-    main h3 {
-        font-size: 0.75em;
-        color: var(--c-text-primary-accent);
-        max-width: 30em;
-    }
-
-    main section {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        white-space: pre-wrap;
-        margin: 0.75em 0;
-        color: var(--c-text-primary-accent);
-        font-size: 0.9em;
-    }
-
-    main .box {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-    }
-
-    main .confirm {
-        font-size: 0.85em;
-        padding: 0 0.65em;
-        border-radius: 0.25em;
-        height: 0;
-        opacity: 0;
-        transition: all 0.3s;
-        --bc-check-box-color: var(--c-green);
-        --bc-check-box-focus: var(--c-focus-border-green);
-    }
-
-    main .confirm.visible {
-        opacity: 1;
-        height: 2.25em;
-    }
-
-    main .confirm.flashing {
-        animation: flashing 0.75s;
-    }
-
-    main .confirm p {
-        margin-left: 0.5em;
-    }
-
-    @keyframes flashing {
-        0%, 100% {
-            background: transparent;
-        }
-        50% {
-            background: var(--c-green);
-        }
-    }
-
-</style>
-
+<div id="data" data-userid="<%= user.id %>" style="display: none"></div>
+<script src="/ta/download.min.js"></script>
 </body>
 </html>

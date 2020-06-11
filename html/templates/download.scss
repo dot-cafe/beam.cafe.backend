@@ -1,0 +1,86 @@
+@import '../styles/base';
+@import '../styles/animations';
+@import '../styles/components';
+@import '../web-components/bc-check-box';
+
+@keyframes flashing {
+    0%, 100% {
+        background: transparent;
+    }
+    50% {
+        background: var(--c-green);
+    }
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+main {
+    background: var(--c-background-primary);
+    max-width: 75vw;
+
+    h3,
+    h1 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+        margin: 0.5em 0 0;
+    }
+
+    h1 {
+        font-size: 1.25em;
+        color: var(--c-text-primary);
+        max-width: 20em;
+    }
+
+    h3 {
+        font-size: 0.75em;
+        color: var(--c-text-primary-accent);
+        max-width: 30em;
+    }
+
+    section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: pre-wrap;
+        margin: 0.75em 0;
+        color: var(--c-text-primary-accent);
+        font-size: 0.9em;
+    }
+
+    .box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .confirm {
+        font-size: 0.85em;
+        padding: 0 0.65em;
+        border-radius: 0.25em;
+        height: 0;
+        opacity: 0;
+        transition: all 0.3s;
+        --bc-check-box-color: var(--c-green);
+        --bc-check-box-focus: var(--c-focus-border-green);
+
+        &.visible {
+            opacity: 1;
+            height: 2.25em;
+        }
+
+        &.flashing {
+            animation: flashing 0.75s;
+        }
+
+        p {
+            margin-left: 0.5em;
+        }
+    }
+}

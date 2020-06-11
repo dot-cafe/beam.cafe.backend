@@ -1,0 +1,39 @@
+bc-check-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: var(--c-background-secondary);
+    transition: all 0.175s;
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+
+    &:focus {
+        box-shadow: 0 0 0 2px var(--bc-check-box-focus, var(--c-focus-border-primary));
+        outline: none;
+    }
+
+    &[checked=true] {
+        background: var(--bc-check-box-color, var(--c-primary));
+    }
+
+    &[checked=true] > svg {
+        stroke-dashoffset: 0;
+    }
+
+    > svg {
+        width: 70%;
+        height: 70%;
+        stroke-width: 7.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke: var(--c-text-primary);
+        stroke-dashoffset: 54;
+        stroke-dasharray: 54;
+        transition: all 0.175s;
+        fill: none;
+    }
+}
