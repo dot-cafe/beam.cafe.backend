@@ -1,7 +1,6 @@
 {
     "server": {
         "port": 8080,
-        "api": "/",
         "internalIdSize": 32,
         "mediaStreamChunkSize": 4096000
     },

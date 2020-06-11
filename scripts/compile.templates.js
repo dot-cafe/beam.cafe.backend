@@ -5,7 +5,7 @@ const {terser} = require('rollup-plugin-terser');
 const path = require('path');
 const fs = require('fs');
 
-const assetDir = path.resolve('dist/ta');
+const assetDir = path.resolve('dist/assets');
 if (!fs.existsSync(assetDir)) {
     fs.mkdirSync(assetDir, {recursive: true});
 }

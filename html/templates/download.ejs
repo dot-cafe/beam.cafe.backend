@@ -12,7 +12,7 @@
 
     <title><%= `Download "${file.name}"` %></title>
 
-    <link rel="stylesheet" href="/ta/download.min.css">
+    <link rel="stylesheet" href="/b/assets/download.min.css">
 </head>
 <body>
 
@@ -27,7 +27,7 @@
     </section>
 
     <div class="box">
-        <a href="/file/<%= file.id %>" target="_blank" class="btn primary" aria-label="Download file">
+        <a href="/b/file/<%= file.id %>" target="_blank" class="btn primary" aria-label="Download file">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path d="M 11 2 C 10.448 2 10 2.448 10 3 L 10 11 L 6.5 11 A 0.5 0.5 0 0 0 6 11.5 A 0.5 0.5 0 0 0 6.1464844 11.853516 A 0.5 0.5 0 0 0 6.1777344 11.882812 L 11.283203 16.697266 L 11.316406 16.728516 A 1 1 0 0 0 12 17 A 1 1 0 0 0 12.683594 16.728516 L 12.697266 16.716797 A 1 1 0 0 0 12.707031 16.705078 L 17.810547 11.892578 A 0.5 0.5 0 0 0 17.839844 11.865234 L 17.847656 11.859375 A 0.5 0.5 0 0 0 17.853516 11.853516 A 0.5 0.5 0 0 0 18 11.5 A 0.5 0.5 0 0 0 17.5 11 L 14 11 L 14 3 C 14 2.448 13.552 2 13 2 L 12 2 L 11 2 z M 3 20 A 1.0001 1.0001 0 1 0 3 22 L 21 22 A 1.0001 1.0001 0 1 0 21 20 L 3 20 z"/>
             </svg>
@@ -35,7 +35,7 @@
         </a>
 
         <% if (user.settings.allowStreaming) { %>
-            <a href="/stream/<%= file.id %>" target="_self" class="btn green" aria-label="Try to stream the file" id="stream-link">
+            <a href="/b/stream/<%= file.id %>" target="_self" class="btn green" aria-label="Try to stream the file" id="stream-link">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
                     <path d="M 5 5 C 3.897 5 3 5.897 3 7 L 3 18 C 3 19.103 3.897 20 5 20 L 9.140625 20 L 10.853516 18 L 5 18 L 5 7 L 25 7 L 25.001953 18 L 19.146484 18 L 20.857422 20 L 25 20 C 26.103 20 27 19.103 27 18 L 27 7 C 27 5.897 26.103 5 25 5 L 5 5 z M 15 16 A 1 1 0 0 0 14.21875 16.375 L 8.3105469 23.277344 A 1 1 0 0 0 8 24 A 1 1 0 0 0 8.8984375 24.994141 L 8.9003906 25 L 21.099609 25 L 21.101562 24.994141 A 1 1 0 0 0 22 24 A 1 1 0 0 0 21.689453 23.277344 L 21.6875 23.275391 L 15.783203 16.378906 A 1 1 0 0 0 15 16 z"/>
                 </svg>
@@ -51,6 +51,6 @@
 </main>
 
 <div id="data" data-userid="<%= user.id %>" style="display: none"></div>
-<script src="/ta/download.min.js"></script>
+<script src="/b/assets/download.min.js"></script>
 </body>
 </html>

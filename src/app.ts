@@ -29,12 +29,16 @@ import {wrapHTTPServer} from './socket';
     }
 
     // Serve template assets
-    const templateAssets = path.resolve(__dirname, dev ? '../dist/ta' : '../ta');
-    app.use('/ta', express.static(templateAssets));
+    const templateAssets = path.resolve(__dirname, dev ? '../dist/assets' : '../assets');
+    app.use('/b/assets', express.static(templateAssets));
 
     // Register api
-    app.use(config.server.api, api());
+    app.use(api());
+
+    // Attach websocket server
     wrapHTTPServer(server);
+
+    // Bind server to express and start listening
     server.on('request', app);
     server.listen(config.server.port);
 
