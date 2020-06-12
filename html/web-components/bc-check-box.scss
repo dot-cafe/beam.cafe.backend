@@ -12,7 +12,7 @@ bc-check-box {
     cursor: pointer;
 
     &:focus {
-        box-shadow: 0 0 0 2px var(--bc-check-box-focus, var(--c-focus-border-primary));
+        box-shadow: 0 0 0 2px var(--bc-check-box-focus, var(--c-primary-focus));
         outline: none;
     }
 

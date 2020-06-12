@@ -1,15 +1,19 @@
 :root {
     --c-green: #1dd081;
     --c-green-accent: #1eba76;
+    --c-green-focus: rgba(22, 233, 82, 0.42);
 
     --c-red: #ef3840;
     --c-red-accent: #d43139;
+    --c-red-focus: rgba(227, 43, 43, 0.42);
 
     --c-yellow: #dcb909;
     --c-yellow-accent: #b89d10;
+    --c-yellow-focus: rgba(233, 230, 22, 0.42);
 
     --c-primary: #3d7cf9;
     --c-primary-accent: #2e6dea;
+    --c-primary-focus: rgba(43, 104, 227, 0.42);
 
     --c-text-primary: #fafafa;
     --c-text-primary-accent: #dcddde;
@@ -21,9 +25,4 @@
     --c-background-secondary: #202225;
     --c-background-secondary-accent: #1d1f21;
     --c-background-tertiary: rgba(0, 0, 0, 0.65);
-
-    --c-focus-border-red: rgba(227, 43, 43, 0.42);
-    --c-focus-border-green: rgba(22, 233, 82, 0.42);
-    --c-focus-border-primary: rgba(43, 104, 227, 0.42);
-    --c-focus-border-yellow: rgba(233, 230, 22, 0.42);
 }

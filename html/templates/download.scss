@@ -64,7 +64,7 @@ main {
         opacity: 0;
         transition: all 0.3s;
         --bc-check-box-color: var(--c-green);
-        --bc-check-box-focus: var(--c-focus-border-green);
+        --bc-check-box-focus: var(--c-green-focus);
 
         &.visible {
             opacity: 1;
