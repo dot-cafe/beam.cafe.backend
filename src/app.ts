@@ -4,8 +4,10 @@ import http             from 'http';
 import * as path        from 'path';
 import {api}            from './api';
 import {config}         from './config';
+import {TEMPLATES}      from './constants';
 import {log, LogLevel}  from './logging';
 import {wrapHTTPServer} from './socket';
+import {renderEJS}      from './utils/render-ejs';
 
 (async (): Promise<void> => {
     const dev = process.env.NODE_ENV === 'development';
@@ -34,6 +36,9 @@ import {wrapHTTPServer} from './socket';
 
     // Register api
     app.use(api());
+
+    // 404 Fallback
+    app.use((_, res) => renderEJS(TEMPLATES.ERROR_404, res));
 
     // Attach websocket server
     wrapHTTPServer(server);

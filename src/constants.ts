@@ -6,6 +6,7 @@ const TEMPLATE_DIR = path.resolve(
 );
 
 export const TEMPLATES = {
+    ERROR_404: path.join(TEMPLATE_DIR, 'error-404.ejs'),
     DOWNLOAD: path.join(TEMPLATE_DIR, 'download.ejs'),
     DOWNLOAD_OFFLINE: path.join(TEMPLATE_DIR, 'download-offline.ejs'),
     DOWNLOAD_NOT_FOUND: path.join(TEMPLATE_DIR, 'download-notfound.ejs'),

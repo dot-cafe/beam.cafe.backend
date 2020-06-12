@@ -1,0 +1,60 @@
+@import '../styles/base';
+@import '../styles/animations';
+@import '../styles/components';
+
+@function random-number($min, $max: null) {
+    @if $max == null {
+        $max: $min;
+        $min: 0;
+    }
+
+    @return floor(random() * ($max - $min + 1)) + $min;
+}
+
+@mixin animation_glitch(
+    $steps: 20,
+    $skew: (-5, 5),
+    $clip: (30, 5, 30, 5)
+) {
+    @include animate('1s infinite linear alternate-reverse') {
+        @for $i from 0 through $steps {
+            #{percentage($i * (1 / $steps))} {
+                transform: skew(random-number(nth($skew, 1), nth($skew, 2)) + deg);
+                clip-path: inset(
+                        unquote(random-number(nth($clip, 1)) + '%') unquote(random-number(nth($clip, 2)) + '%') unquote(random-number(nth($clip, 3)) + '%') unquote(random-number(nth($clip, 4)) + '%')
+                );
+            }
+        }
+    }
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+main {
+
+    &.dialog {
+        box-shadow: none;
+    }
+
+    h1 {
+        font-size: 6em;
+        position: relative;
+        color: white;
+
+        > span:last-child {
+            @include animation_glitch();
+            @include position(0, 0, 0, 0);
+            @include size(100%);
+            text-shadow: -2px 0 #00ffd4, 2px 2px #f0f;
+            position: absolute;
+        }
+    }
+
+    h3 {
+        margin: 0.5em 0;
+    }
+}
