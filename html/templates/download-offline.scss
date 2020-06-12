@@ -17,9 +17,8 @@ main {
     }
 
     > svg {
-        fill: white;
-        height: 3em;
-        width: 3em;
+        @include size(3em);
         margin: 0.5em auto 1em;
+        fill: white;
     }
 }

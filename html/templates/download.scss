@@ -44,9 +44,7 @@ main {
     }
 
     section {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        @include flex(row, center, center);
         white-space: pre-wrap;
         margin: 0.75em 0;
         color: var(--c-text-primary-accent);
@@ -54,9 +52,7 @@ main {
     }
 
     .box {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        @include flex(row, center, center);
         text-decoration: none;
     }
 

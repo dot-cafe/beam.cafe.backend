@@ -7,7 +7,7 @@ const fs = require('fs-extra');
 chokidar.watch('html/templates/*.scss').on('all', (event, file) => {
     compileSass(file, false)
         .then(() => console.log(`Compiled ${file}`))
-        .catch(e => console.error(e));
+        .catch(e => console.error(e.formatted));
 });
 
 // Recompile js
