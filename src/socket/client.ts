@@ -7,7 +7,7 @@ import {handleAction}  from './action';
 export const acceptClient = (ws: WebSocket, req: Request): void => {
     let client = new Client(ws, req);
 
-    ws.on('message', (message: string) => {
+    ws.on('message', async (message: string) => {
 
         // Answer ping request
         if (message === '__PING__') {
@@ -16,7 +16,7 @@ export const acceptClient = (ws: WebSocket, req: Request): void => {
 
         // Try to parse message
         try {
-            client = handleAction(client, JSON.parse(message), ws);
+            client = await handleAction(client, JSON.parse(message), ws);
         } catch (e) {
             log('invalid-payload', {
                 location: 'ws-entry',

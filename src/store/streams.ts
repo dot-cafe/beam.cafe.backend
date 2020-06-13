@@ -2,15 +2,15 @@ import {Request, Response}    from 'express';
 import {config}               from '../config';
 import {log, LogLevel}        from '../logging';
 import {Collection}           from '../utils/db/Collection';
-import {uid}                  from '../utils/uid';
+import {secureUid}            from '../utils/uid';
 import {Client}               from './Client';
 import {Stream, StreamStatus} from './Stream';
 
 export const streams = new class extends Collection<Stream> {
     private readonly streamKeys: Map<string, string> = new Map();
 
-    public createStreamKey(fileid: string): string {
-        const id = uid(config.security.streamKeySize);
+    public async createStreamKey(fileid: string): Promise<string> {
+        const id = await secureUid(config.security.streamKeySize);
         this.streamKeys.set(id, fileid);
 
         return id;

@@ -6,7 +6,7 @@ import {HostedFile}        from '../types';
 import {CollectionItem}    from '../utils/db/CollectionItem';
 import {decryptUserAgent}  from '../utils/decrypt-user-agent';
 import {serializeFilename} from '../utils/serializeFileName';
-import {uid}               from '../utils/uid';
+import {secureUid}         from '../utils/uid';
 import {clients}           from './clients';
 import {transmissions}     from './transmissions';
 
@@ -65,9 +65,9 @@ export class Client extends CollectionItem {
         }
     }
 
-    public createSession(): boolean {
+    public async createSession(): Promise<boolean> {
         if (this.sessionKey === null) {
-            this.sessionKey = uid(config.security.clientWebSocketSessionKeySize);
+            this.sessionKey = await secureUid(config.security.clientWebSocketSessionKeySize);
             this.sendMessage('new-session', this.sessionKey);
 
             log('create-session', {
@@ -85,7 +85,7 @@ export class Client extends CollectionItem {
         return false;
     }
 
-    public restoreSession(newSocket: WebSocket): boolean {
+    public async restoreSession(newSocket: WebSocket): Promise<boolean> {
 
         // Check if the session of the client got "invalidated"
         if (this.connectionTimeout !== null) {
@@ -96,7 +96,7 @@ export class Client extends CollectionItem {
 
             // Reset timeout and create new session-key
             this.connectionTimeout = null;
-            this.sessionKey = uid(config.security.clientWebSocketSessionKeySize);
+            this.sessionKey = await secureUid(config.security.clientWebSocketSessionKeySize);
 
             this.sendMessage('restore-session', {
                 key: this.sessionKey,
@@ -121,9 +121,9 @@ export class Client extends CollectionItem {
         return false;
     }
 
-    public registerFiles(
+    public async registerFiles(
         incomingFiles: Array<{name: string, size: number}>
-    ): void {
+    ): Promise<void> {
         const files: Array<HostedFile> = [];
         for (const file of incomingFiles) {
             const {name, size} = file;
@@ -133,7 +133,7 @@ export class Client extends CollectionItem {
             }
 
             files.push({
-                id: uid(config.security.fileKeySize),
+                id: await secureUid(config.security.fileKeySize),
                 serializedName: serializeFilename(name),
                 name, size
             });
@@ -177,10 +177,10 @@ export class Client extends CollectionItem {
         }
     }
 
-    public requestFile(
+    public async requestFile(
         fileId: string,
         downloadId: string
-    ): void {
+    ): Promise<void> {
         const file = this.files.find(value => value.id === fileId);
 
         if (file) {
@@ -190,7 +190,7 @@ export class Client extends CollectionItem {
 
             // Refresh key of this file
             if (!this.settings.reusableDownloadKeys) {
-                const newId = uid(config.security.fileKeySize);
+                const newId = await secureUid(config.security.fileKeySize);
                 this.sendMessage('refresh-files', [{
                     id: file.id,
                     newId
@@ -232,7 +232,7 @@ export class Client extends CollectionItem {
         }
     }
 
-    public refreshFiles(ids: Array<string>): void {
+    public async refreshFiles(ids: Array<string>): Promise<void> {
 
         // Generate new keys
         const files: Array<unknown> = [];
@@ -247,7 +247,7 @@ export class Client extends CollectionItem {
                 }
 
                 // Refresh key
-                const newId = uid(config.security.fileKeySize);
+                const newId = await secureUid(config.security.fileKeySize);
                 files.push({
                     id: file.id,
                     newId
@@ -260,7 +260,7 @@ export class Client extends CollectionItem {
         this.sendMessage('refresh-files', files);
     }
 
-    public refreshAllFiles(): void {
+    public async refreshAllFiles(): Promise<void> {
 
         // Cancel all downloads
         for (const download of transmissions.byClient(this)) {
@@ -271,7 +271,7 @@ export class Client extends CollectionItem {
         for (const file of this.files) {
 
             // Refresh key
-            const newId = uid(config.security.fileKeySize);
+            const newId = await secureUid(config.security.fileKeySize);
             files.push({
                 id: file.id,
                 newId

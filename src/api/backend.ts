@@ -55,8 +55,9 @@ export default (): Router => {
             } else {
 
                 // Create new, unique download-key and redirect client
-                const key = transmissions.createTransmissionKey(id);
-                res.redirect(303, `/b/file/${id}/${key}`);
+                transmissions.createTransmissionKey(id).then(key => {
+                    res.redirect(303, `/b/file/${id}/${key}`);
+                });
                 return;
             }
         }
@@ -85,8 +86,9 @@ export default (): Router => {
             } else {
 
                 // Create new, unique stream-key and redirect client
-                const key = streams.createStreamKey(id);
-                res.redirect(302, `/b/stream/${id}/${key}`);
+                streams.createStreamKey(id).then(key => {
+                    res.redirect(302, `/b/stream/${id}/${key}`);
+                });
                 return;
             }
         }

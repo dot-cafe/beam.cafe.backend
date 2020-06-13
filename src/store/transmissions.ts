@@ -2,7 +2,7 @@ import {Request, Response}                from 'express';
 import {config}                           from '../config';
 import {log, LogLevel}                    from '../logging';
 import {Collection}                       from '../utils/db/Collection';
-import {uid}                              from '../utils/uid';
+import {secureUid}                        from '../utils/uid';
 import {Client}                           from './Client';
 import {Transmission, TransmissionStatus} from './Transmission';
 
@@ -28,8 +28,8 @@ export const transmissions = new class extends Collection<Transmission> {
         return super.filter(value => value.file.id === id);
     }
 
-    public createTransmissionKey(fileId: string): string {
-        const downloadId = uid(64);
+    public async createTransmissionKey(fileId: string): Promise<string> {
+        const downloadId = await secureUid(64);
 
         this.redirects.set(downloadId, {
             fileId,

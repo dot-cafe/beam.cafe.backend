@@ -41,7 +41,7 @@ export const clients = new class extends Collection<Client> {
         return null;
     }
 
-    public restoreSession(key: string, newSocket: WebSocket): Client | null {
+    public async restoreSession(key: string, newSocket: WebSocket): Promise<Client | null> {
 
         // Find client with the corresponding session-key
         for (const client of this) {
@@ -49,7 +49,7 @@ export const clients = new class extends Collection<Client> {
                 client.sessionKey !== null &&
                 client.sessionKey === key
             ) {
-                if (client.restoreSession(newSocket)) {
+                if (await client.restoreSession(newSocket)) {
                     return client;
                 }
 

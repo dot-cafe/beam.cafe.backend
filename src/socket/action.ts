@@ -12,11 +12,11 @@ import {validation}    from './validation';
  * Returns the client itself or the new client in case a session
  * got restored.
  */
-export function handleAction(
+export async function handleAction(
     client: Client,
     data: unknown,
     ws: WebSocket
-): Client {
+): Promise<Client> {
     const {error, value} = validation.ClientAction.validate(data);
     if (error) {
         log('validation-error', {error}, LogLevel.WARNING);
@@ -35,22 +35,24 @@ export function handleAction(
             if (error) {
                 log('validation-error', {error}, LogLevel.WARNING);
             } else {
-                const oldClient = clients.restoreSession(value, ws);
+                return clients.restoreSession(value, ws).then(ok => {
 
-                if (oldClient) {
+                    if (ok) {
 
-                    // Remove current client and use new one
-                    clients.delete(client);
-                    return oldClient;
-                }
+                        // Remove current client and use new one
+                        clients.delete(client);
+                        return ok;
+                    }
 
-                // Create a fresh sessions, this will clear all states client-side
-                client.createSession();
+                    // Create a fresh sessions, this will clear all states client-side
+                    client.createSession();
+                    return client;
+                });
             }
             break;
         }
         case 'create-session': {
-            client.createSession();
+            await client.createSession();
             break;
         }
         case 'register-files': {
@@ -59,7 +61,7 @@ export function handleAction(
             if (error) {
                 log('validation-error', {error}, LogLevel.WARNING);
             } else {
-                client.registerFiles(value);
+                await client.registerFiles(value);
             }
             break;
         }
@@ -69,12 +71,12 @@ export function handleAction(
             if (error) {
                 log('validation-error', {error}, LogLevel.WARNING);
             } else {
-                client.refreshFiles(value);
+                await client.refreshFiles(value);
             }
             break;
         }
         case 'refresh-all-files': {
-            client.refreshAllFiles();
+            await client.refreshAllFiles();
             break;
         }
         case 'cancel-requests': {
@@ -121,7 +123,7 @@ export function handleAction(
             }
 
             for (const item of payload) {
-                handleAction(client, item, ws);
+                await handleAction(client, item, ws);
             }
 
             break;
