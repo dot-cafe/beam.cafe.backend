@@ -81,9 +81,9 @@ export class Stream extends CollectionItem {
          * see https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#14.16%20Content-Range
          */
         downloaderResponse.writeHead(this.hadRange ? 206 : 200, {
-            'Content-Range': `bytes ${range[0]}-${range[1] - 1}/${file.size}`,
+            'Content-Range': `bytes ${range[0]}-${range[1]}/${file.size}`,
             'Accept-Ranges': 'bytes',
-            'Content-Length': `${range[1] - range[0]}`,
+            'Content-Length': `${range[1] - range[0] + 1}`,
             'Content-Type': mime.lookup(file.name)
         });
 

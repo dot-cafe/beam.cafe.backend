@@ -7,6 +7,9 @@ export const parseByteRangeHeader = (str: string, size: number): [number, number
     const {mediaStreamChunkSize} = config.server;
     const rangeParts = headerRegexp.exec(str);
 
+    // Byte-ranges are zero-inclusive
+    size--;
+
     if (!rangeParts) {
         return [0, size];
     }
@@ -39,7 +42,6 @@ export const parseByteRangeHeader = (str: string, size: number): [number, number
 
     // Return chunk after offset
     const offset = Math.min(size, numStart);
-    const chunkEnd = offset + mediaStreamChunkSize;
-    return [offset, Math.min(numEnd, chunkEnd)];
-
+    const chunkEnd = Math.min(offset + mediaStreamChunkSize, numEnd, size);
+    return [offset, chunkEnd];
 };

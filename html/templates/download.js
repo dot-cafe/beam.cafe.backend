@@ -12,7 +12,6 @@ streamLink.addEventListener('click', e => {
 
     // User already approved this source
     if (trustedUsers.includes(userId)) {
-        console.log(trustedUsers);
         return;
     }
 
