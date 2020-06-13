@@ -133,7 +133,7 @@ export class Client extends CollectionItem {
             }
 
             files.push({
-                id: uid(),
+                id: uid(config.security.fileKeySize),
                 serializedName: serializeFilename(name),
                 name, size
             });
@@ -190,7 +190,7 @@ export class Client extends CollectionItem {
 
             // Refresh key of this file
             if (!this.settings.reusableDownloadKeys) {
-                const newId = uid();
+                const newId = uid(config.security.fileKeySize);
                 this.sendMessage('refresh-files', [{
                     id: file.id,
                     newId
@@ -247,7 +247,7 @@ export class Client extends CollectionItem {
                 }
 
                 // Refresh key
-                const newId = uid();
+                const newId = uid(config.security.fileKeySize);
                 files.push({
                     id: file.id,
                     newId
@@ -271,8 +271,7 @@ export class Client extends CollectionItem {
         for (const file of this.files) {
 
             // Refresh key
-
-            const newId = uid();
+            const newId = uid(config.security.fileKeySize);
             files.push({
                 id: file.id,
                 newId

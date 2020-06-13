@@ -13,6 +13,7 @@ type Config = {
     };
 
     security: {
+        fileKeySize: number;
         streamKeySize: number;
         downloadKeySize: number;
         downloadKeyMaxAge: number;

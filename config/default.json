@@ -5,6 +5,7 @@
         "mediaStreamChunkSize": 4096000
     },
     "security": {
+        "fileKeySize": 8,
         "streamKeySize": 64,
         "downloadKeySize": 64,
         "downloadKeyMaxAge": 60000,

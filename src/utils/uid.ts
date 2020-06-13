@@ -1,4 +1,4 @@
-export const uid = (length = 8): string => {
+export const uid = (length: number): string => {
     if (length < 8) {
         throw new Error('Minimum length for an uid is 8.');
     }

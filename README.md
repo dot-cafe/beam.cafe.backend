@@ -43,6 +43,7 @@ A config file consists of the following options, each option is optional and wil
         "mediaStreamChunkSize": 4096000 // Maximum size of a chunk used in streaming
     },
     "security": {
+        "fileKeySize": 8, // File-key size, used as part of the download-link - the longer the better
         "streamKeySize": 64, // Access-key size for streams - the longer the better
         "downloadKeySize": 64, // Access-key size for downloads - the longer the better
         "downloadKeyMaxAge": 60000, // Maximum age of a download key until its used - the shorter the better
