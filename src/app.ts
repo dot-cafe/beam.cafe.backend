@@ -38,7 +38,10 @@ import {renderEJS}      from './utils/render-ejs';
     app.use(api());
 
     // 404 Fallback
-    app.use((_, res) => renderEJS(TEMPLATES.ERROR_404, res));
+    app.use((_, res) => renderEJS({
+        template: TEMPLATES.ERROR_404,
+        response: res
+    }));
 
     // Attach websocket server
     wrapHTTPServer(server);

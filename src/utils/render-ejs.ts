@@ -3,11 +3,21 @@ import {Response}   from 'express';
 import prettyBytes  from 'pretty-bytes';
 import {minifyHtml} from './minify-html';
 
+export type RenderEjsPayload = {
+    template: string;
+    response: Response;
+    status?: number;
+    data?: Record<string, unknown>;
+}
+
 const dev = process.env.NODE_ENV === 'development';
 export const renderEJS = (
-    template: string,
-    res: Response,
-    data: Record<string, unknown> = {}
+    {
+        template,
+        response,
+        data = {},
+        status = 200
+    }: RenderEjsPayload
 ): void => {
     ejs.renderFile(template, {
         prettyBytes,
@@ -22,9 +32,10 @@ export const renderEJS = (
                 console.error(err);
             }
 
-            res.sendStatus(500);
+            response.sendStatus(500);
         } else {
-            res.send(minifyHtml(str));
+            response.status(status);
+            response.send(minifyHtml(str));
         }
     });
 };

@@ -62,7 +62,11 @@ export default (): Router => {
             }
         }
 
-        renderEJS(TEMPLATES.DOWNLOAD_GONE, res);
+        renderEJS({
+            template: TEMPLATES.DOWNLOAD_GONE,
+            response: res,
+            status: 410
+        });
     });
 
     router.get('/stream/:id/:hash?', (req, res) => {
@@ -93,7 +97,11 @@ export default (): Router => {
             }
         }
 
-        renderEJS(TEMPLATES.DOWNLOAD_GONE, res);
+        renderEJS({
+            template: TEMPLATES.DOWNLOAD_GONE,
+            response: res,
+            status: 410
+        });
     });
 
     return router;

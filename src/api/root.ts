@@ -13,20 +13,26 @@ export default (): Router => {
         let template = TEMPLATES.DOWNLOAD_NOT_FOUND;
         let file: HostedFile | null = null;
         let user: Client | null = null;
+        let status = 404;
 
         if (resolved) {
             [user, file] = resolved;
 
             // Change template if user is offline
             if (user.disconnected) {
+                status = 423;
                 template = TEMPLATES.DOWNLOAD_OFFLINE;
             } else {
+                status = 200;
                 template = TEMPLATES.DOWNLOAD;
             }
         }
 
-        // TODO: Response code?
-        renderEJS(template, res, {file, user});
+        renderEJS({
+            template, status,
+            response: res,
+            data: {file, user}
+        });
     });
 
     return router;
