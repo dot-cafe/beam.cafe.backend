@@ -8,14 +8,14 @@
     "main": "src/app.ts",
     "scripts": {
         "build": "run-p build:ts build:templates",
-        "build:ts": "node scripts/build.templates.js",
-        "build:templates": "tsc --project tsconfig.json",
+        "build:ts": "tsc --project tsconfig.json",
+        "build:templates": "node scripts/build.templates.js",
         "start": "tsc && node dist/app.js",
         "dev": "run-p dev:ts dev:templates",
         "dev:ts": "ts-node-dev --respawn --transpileOnly src/app.ts",
         "dev:templates": "node scripts/watch.templates.js",
-        "lint:ts": "eslint src/**/*.{js,ts,tsx}",
-        "lint:ts:fix": "eslint src/**/*.{js,ts,tsx} --fix",
+        "lint:ts": "eslint src/**/*.{js,ts,tsx} html/**/*.{js,ts,tsx}",
+        "lint:ts:fix": "eslint src/**/*.{js,ts,tsx} html/**/*.{js,ts,tsx} --fix",
         "lint:types": "tsc --project tsconfig.json --noEmit",
         "lint:fix": "npm run lint:ts:fix && npm run lint:types"
     },
