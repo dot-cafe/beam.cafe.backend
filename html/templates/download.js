@@ -1,8 +1,10 @@
 import '../web-components/bc-check-box';
 
-const userId = document.getElementById('data').dataset.userid;
-const trustedUserKey = 'trusted-users';
-const trustedUsers = JSON.parse(localStorage.getItem(trustedUserKey) || '[]');
+// Timeout until the user has to click "I trust the source" again
+const TRUSTED_USER_TIMEOUT = 1000 * 60 * 60 * 24 * 3; // 3 Days
+const TRUSTED_USER_LIST_KEY = 'trusted-users';
+
+const userId = document.currentScript.dataset.userid;
 const confirmStreamBox = document.querySelector('.confirm');
 const confirmStreamCheckbox = document.querySelector('.confirm > bc-check-box');
 const streamLink = document.querySelector('#stream-link');
@@ -10,8 +12,12 @@ let timeout = null;
 
 streamLink.addEventListener('click', e => {
 
+    // Fetch already approved users and filter out expired items
+    const trustedUsers = JSON.parse(localStorage.getItem(TRUSTED_USER_LIST_KEY) || '[]')
+        .filter(v => (Date.now() - v.timestamp) < TRUSTED_USER_TIMEOUT);
+
     // User already approved this source
-    if (trustedUsers.includes(userId)) {
+    if (trustedUsers.find(v => v.id === userId)) {
         return;
     }
 
@@ -29,8 +35,11 @@ streamLink.addEventListener('click', e => {
         }, 750);
     } else {
         localStorage.setItem(
-            trustedUserKey,
-            JSON.stringify([...trustedUsers, userId])
+            TRUSTED_USER_LIST_KEY,
+            JSON.stringify([
+                ...trustedUsers,
+                {id: userId, timestamp: Date.now()}
+            ])
         );
     }
 });
