@@ -1,5 +1,5 @@
-import {Request, Response}                     from 'express';
 import mime                                    from 'mime-types';
+import {Request, Response}                     from 'express';
 import {HostedFile}                            from '../types';
 import {CollectionItem}                        from '../utils/db/CollectionItem';
 import {ByteRangeHeader, parseByteRangeHeader} from '../utils/parseByteRangeHeader';
@@ -45,16 +45,25 @@ export class Stream extends CollectionItem {
         this.provider = fileProvider;
         this.file = file;
 
-        // Add to downloads and initiate transfer
-        streams.add(this);
-
         const rangeString = downloaderRequest.header('Range');
-        const range: [number, number] = rangeString ? parseByteRangeHeader(rangeString, file.size) : [0, file.size];
-        this.range = range;
-        this.hadRange = !!rangeString;
+        const parsedRange = rangeString ? parseByteRangeHeader(rangeString, file.size) : [0, file.size] as [number, number];
 
-        fileProvider.requestStream(file.id, this.id, streamKey, range);
-        this.bindDownloaderEvents();
+        // Request range not satisfiable
+        if (parsedRange === null) {
+            downloaderResponse.sendStatus(416);
+            this.range = [0, file.size];
+            this.hadRange = false;
+        } else {
+
+            // Add to downloads and initiate transfer
+            streams.add(this);
+            this.range = parsedRange;
+            this.hadRange = !!rangeString;
+
+            // Request file from peer
+            fileProvider.requestStream(file.id, this.id, streamKey, parsedRange);
+            this.bindDownloaderEvents();
+        }
     }
 
     public cancel(): void {

@@ -3,7 +3,14 @@ import {config} from '../config';
 export type ByteRangeHeader = [number, number];
 
 const headerRegexp = /^bytes=(\d+)?-(\d+)?/;
-export const parseByteRangeHeader = (str: string, size: number): [number, number] => {
+
+/**
+ * Resolves the first part of a range-header, returns null if the request range
+ * is not satisfiable
+ * @param str Header string
+ * @param size File size
+ */
+export const parseByteRangeHeader = (str: string, size: number): [number, number] | null => {
     const {mediaStreamChunkSize} = config.server;
     const rangeParts = headerRegexp.exec(str);
 
@@ -20,6 +27,12 @@ export const parseByteRangeHeader = (str: string, size: number): [number, number
     const hasStart = numStart !== -1;
     const hasEnd = numEnd !== -1;
 
+    // Validate range
+    if (hasStart && numStart > size ||
+        hasEnd && numEnd > size) {
+        return null;
+    }
+
     if (!hasStart && !hasEnd) {
 
         // Return first chunk
@@ -27,7 +40,7 @@ export const parseByteRangeHeader = (str: string, size: number): [number, number
     } else if (!hasStart && hasEnd) {
 
         // Last numEnd-bytes
-        const offset = Math.max(0, size - numEnd);
+        const offset = size - numEnd;
         const chunkEnd = offset + mediaStreamChunkSize;
 
         // Return first chunk from offset
@@ -35,13 +48,11 @@ export const parseByteRangeHeader = (str: string, size: number): [number, number
     } else if (hasStart && !hasEnd) {
 
         // Return chunk after offset
-        const offset = Math.min(size, numStart);
-        const chunkEnd = offset + mediaStreamChunkSize;
-        return [offset, Math.min(size, chunkEnd)];
+        const chunkEnd = numStart + mediaStreamChunkSize;
+        return [numStart, Math.min(size, chunkEnd)];
     }
 
     // Return chunk after offset
-    const offset = Math.min(size, numStart);
-    const chunkEnd = Math.min(offset + mediaStreamChunkSize, numEnd, size);
-    return [offset, chunkEnd];
+    const chunkEnd = Math.min(numStart + mediaStreamChunkSize, numEnd, size);
+    return [numStart, chunkEnd];
 };
