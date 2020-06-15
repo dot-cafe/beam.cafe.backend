@@ -9,7 +9,8 @@
         "streamKeySize": 64,
         "downloadKeySize": 64,
         "downloadKeyMaxAge": 60000,
-        "clientWebSocketConnectionTimeout": 900000,
+        "clientWebSocketTimeout": 15000,
+        "clientWebSocketSessionTimeout": 900000,
         "clientWebSocketSessionKeySize": 64
     },
     "logs": {

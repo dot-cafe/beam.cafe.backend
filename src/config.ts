@@ -17,7 +17,8 @@ type Config = {
         streamKeySize: number;
         downloadKeySize: number;
         downloadKeyMaxAge: number;
-        clientWebSocketConnectionTimeout: number;
+        clientWebSocketTimeout: number;
+        clientWebSocketSessionTimeout: number;
         clientWebSocketSessionKeySize: number;
     };
 

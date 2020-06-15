@@ -26,6 +26,7 @@ export class Client extends CollectionItem {
     public readonly files: Array<HostedFile>;
     public readonly settings: Settings;
     public readonly userAgent: string;
+    public readonly socketTimeout: number;
     public socket: WebSocket;
     public sessionKey: string | null;
 
@@ -48,6 +49,16 @@ export class Client extends CollectionItem {
             'hidden';
 
         clients.add(this);
+        this.socketTimeout = setTimeout(() => {
+
+            // Check if there's still no active session
+            if (!this.sessionKey) {
+
+                // Force-close socket and remove client
+                socket.close();
+                clients.delete(this);
+            }
+        }, config.security.clientWebSocketTimeout) as unknown as number;
     }
 
     public get disconnected(): boolean {
@@ -60,7 +71,7 @@ export class Client extends CollectionItem {
         } else {
             this.connectionTimeout = setTimeout(
                 () => clients.delete(this),
-                config.security.clientWebSocketConnectionTimeout
+                config.security.clientWebSocketSessionTimeout
             );
         }
     }
@@ -69,6 +80,7 @@ export class Client extends CollectionItem {
         if (this.sessionKey === null) {
             this.sessionKey = await secureUid(config.security.clientWebSocketSessionKeySize);
             this.sendMessage('new-session', this.sessionKey);
+            clearTimeout(this.socketTimeout);
 
             log('create-session', {
                 userId: this.id,

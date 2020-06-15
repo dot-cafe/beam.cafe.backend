@@ -47,7 +47,8 @@ A config file consists of the following options, each option is optional and wil
         "streamKeySize": 64, // Access-key size for streams - the longer the better
         "downloadKeySize": 64, // Access-key size for downloads - the longer the better
         "downloadKeyMaxAge": 60000, // Maximum age of a download key until its used - the shorter the better
-        "clientWebSocketConnectionTimeout": 900000, // Timeout for web-socket connections
+        "clientWebSocketTimeout": 15000, // Timout for a websocket without a session - the shorter the better
+        "clientWebSocketSessionTimeout": 900000, // Timeout for web-socket connections
         "clientWebSocketSessionKeySize": 64 // Size of a session-key - the longer the better
     },
     "logs": {
