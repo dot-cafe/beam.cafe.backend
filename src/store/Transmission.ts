@@ -22,7 +22,6 @@ export class Transmission extends CollectionItem {
 
     // Download status
     public status: TransmissionStatus = TransmissionStatus.Pending;
-    public done = false;
     private readonly downloaderRequest: Request;
     private readonly downloaderResponse: Response;
 
@@ -101,7 +100,6 @@ export class Transmission extends CollectionItem {
             // An error occured somewhere between both clients
             uploaderResponse.sendStatus(500);
             this.status = TransmissionStatus.Errored;
-            this.done = true;
 
             // Clean up
             transmissions.delete(this);
@@ -124,7 +122,6 @@ export class Transmission extends CollectionItem {
             // Finish requests
             uploaderResponse.sendStatus(200);
             this.status = TransmissionStatus.Finished;
-            this.done = true;
 
             // Clean up
             transmissions.delete(this);
@@ -140,8 +137,6 @@ export class Transmission extends CollectionItem {
                 this.status !== TransmissionStatus.Cancelled &&
                 this.status !== TransmissionStatus.PeerReset) {
                 this.status = TransmissionStatus.PeerReset;
-                this.done = true;
-
                 this.provider.sendMessage('download-cancelled', this.id);
 
                 // Cleanup
@@ -153,9 +148,7 @@ export class Transmission extends CollectionItem {
         downloaderResponse.on('close', () => {
             if (this.status !== TransmissionStatus.Finished &&
                 this.status !== TransmissionStatus.Cancelled) {
-
                 this.status = TransmissionStatus.PeerReset;
-                this.done = true;
 
                 this.provider.sendMessage('download-cancelled', this.id);
 
