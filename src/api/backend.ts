@@ -43,7 +43,7 @@ export default (): Router => {
             const [client, file] = resolved;
 
             // Check transfer-limit
-            if (clients.checkIPLimit(client)) {
+            if (clients.checkIPLimit(client, file.size)) {
                 return renderEJS({
                     template: TEMPLATES.DOWNLOAD_RATE_LIMITED,
                     response: res,
@@ -87,7 +87,7 @@ export default (): Router => {
             const [client, file] = resolved;
 
             // Check transfer-limit
-            if (clients.checkIPLimit(client)) {
+            if (clients.checkIPLimit(client, file.size)) {
                 return renderEJS({
                     template: TEMPLATES.DOWNLOAD_RATE_LIMITED,
                     response: res,

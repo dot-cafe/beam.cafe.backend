@@ -39,7 +39,7 @@ export const clients = new class extends Collection<Client> {
         return this.checkIPLimit(client);
     }
 
-    public checkIPLimit(client: Client): boolean {
+    public checkIPLimit(client: Client, additional = 0): boolean {
         const item = this.transferLimitMap.get(client.ip);
 
         if (item) {
@@ -54,6 +54,8 @@ export const clients = new class extends Collection<Client> {
                     bytesTransferred: item.amount
                 }, LogLevel.DEBUG);
 
+                return true;
+            } else if ((item.amount + additional) > config.security.transferLimit) {
                 return true;
             }
         }
