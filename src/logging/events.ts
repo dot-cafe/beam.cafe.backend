@@ -23,6 +23,8 @@ type StreamData = {streamKey: string; streamId: string};
 type StreamEvent = SessionEvent & StreamData & {fileId: string};
 type StreamEventFailed = SessionEventFailed & StreamData & {fileId: string};
 
+type TransferLimit = SessionEvent & {ip: string; bytesTransferred: number;}
+
 /* ===== UPLOAD / STREAM EVENTS ===== */
 type UploadTransferEventFailed = Error & {downloadId: string};
 type UploadStreamEventFailed = Error & {streamId: string};
@@ -51,4 +53,6 @@ export type Events = {
     'accept-stream-failed': UploadStreamEventFailed;
     'request-stream': StreamEvent;
     'request-stream-failed': StreamEventFailed;
+    'transfer-limit-locked': TransferLimit;
+    'transfer-limit-reset': TransferLimit;
 }

@@ -93,13 +93,10 @@ export class Transmission extends CollectionItem {
 
         uploaderRequest.on('data', chunk => {
             if (clients.updateIPLimit(this.provider, chunk.length)) {
-                downloaderResponse.destroy();
                 uploaderRequest.destroy();
-                this.done = true;
 
-                // Cancel download
-                this.status = TransmissionStatus.Cancelled;
-                this.provider.sendMessage('download-cancelled', this.id);
+                // Triggers the close event
+                downloaderResponse.destroy();
                 this.provider.sendRateLimitInfo();
             } else {
                 downloaderResponse.write(chunk);
