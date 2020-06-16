@@ -5,6 +5,7 @@ import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
 import {CollectionItem}    from '../utils/db/CollectionItem';
 import {decryptUserAgent}  from '../utils/decrypt-user-agent';
+import {resolveClientIP}   from '../utils/resolveClientIP';
 import {serializeFilename} from '../utils/serializeFileName';
 import {secureUid}         from '../utils/uid';
 import {clients}           from './clients';
@@ -23,6 +24,7 @@ export class Client extends CollectionItem {
         allowStreaming: true
     };
 
+    public readonly ip: string;
     public readonly files: Array<HostedFile>;
     public readonly settings: Settings;
     public readonly userAgent: string;
@@ -41,14 +43,18 @@ export class Client extends CollectionItem {
         this.sessionKey = null;
         this.connectionTimeout = null;
         this.timeoutTimestamp = 0;
+        this.ip = resolveClientIP(req) as string; // I assume the socket isn't destroyed yet
         this.settings = {...Client.DEFAULT_SETTINGS};
 
+        // Client user-agent
         const uaHeader = req.headers['user-agent'];
         this.userAgent = config.logs.logUserAgent ?
             uaHeader ? decryptUserAgent(uaHeader) : 'unknown' :
             'hidden';
 
         clients.add(this);
+
+        // Session timeout
         this.socketTimeout = setTimeout(() => {
 
             // Check if there's still no active session
@@ -87,6 +93,11 @@ export class Client extends CollectionItem {
                 userAgent: this.userAgent
             }, LogLevel.DEBUG);
 
+            // Check transfer limit
+            if (clients.checkIPLimit(this)) {
+                this.sendRateLimitInfo();
+            }
+
             return true;
         }
 
@@ -122,6 +133,11 @@ export class Client extends CollectionItem {
             log('restore-session', {
                 userId: this.id
             }, LogLevel.DEBUG);
+
+            // Check transfer limit
+            if (clients.checkIPLimit(this)) {
+                this.sendRateLimitInfo();
+            }
 
             return true;
         }
@@ -293,6 +309,13 @@ export class Client extends CollectionItem {
         }
 
         this.sendMessage('refresh-files', files);
+    }
+
+    public sendRateLimitInfo(): void {
+        this.sendMessage('rate-limited', {
+            limit: config.security.transferLimit,
+            remainingTime: clients.remainingTimeForIPLimit(this)
+        });
     }
 
     public applySettings(settings: Partial<Settings>): void {

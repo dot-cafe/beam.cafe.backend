@@ -20,6 +20,8 @@ type Config = {
         clientWebSocketTimeout: number;
         clientWebSocketSessionTimeout: number;
         clientWebSocketSessionKeySize: number;
+        transferLimit: number;
+        transferLimitResetInterval: number;
     };
 
     logs: {

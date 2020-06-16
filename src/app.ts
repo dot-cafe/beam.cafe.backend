@@ -16,6 +16,7 @@ import {renderEJS}      from './utils/render-ejs';
 
     // Disable powered-by-message
     app.disable('x-powered-by');
+    app.set('trust proxy', true);
 
     // Enable cors during development
     if (dev) {

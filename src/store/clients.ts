@@ -1,4 +1,5 @@
 import * as WebSocket  from 'ws';
+import {config}        from '../config';
 import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
 import {Collection}    from '../utils/db/Collection';
@@ -6,7 +7,63 @@ import {Client}        from './Client';
 import {streams}       from './streams';
 import {transmissions} from './transmissions';
 
+type TransferLimitEntry = {
+    amount: number;
+    timestamp: number;
+}
+
 export const clients = new class extends Collection<Client> {
+    private readonly transferLimitMap: Map<string, TransferLimitEntry> = new Map();
+
+    public updateIPLimit(client: Client, amount: number): boolean {
+        let item = this.transferLimitMap.get(client.ip);
+
+        if (!item) {
+            item = {
+                amount,
+                timestamp: Date.now()
+            } as TransferLimitEntry;
+
+            this.transferLimitMap.set(client.ip, item);
+        } else {
+            item.amount += amount;
+        }
+
+        return this.checkIPLimit(client);
+    }
+
+    public checkIPLimit(client: Client): boolean {
+        const item = this.transferLimitMap.get(client.ip);
+
+        if (!item) {
+            return false;
+        }
+
+        // Clear restriction
+        const timeDiff = Date.now() - item.timestamp;
+        if (timeDiff > config.security.transferLimitResetInterval) {
+            this.transferLimitMap.delete(client.ip);
+            return true;
+        }
+
+        return item.amount > config.security.transferLimit;
+    }
+
+    public remainingTimeForIPLimit(client: Client): number {
+        const item = this.transferLimitMap.get(client.ip);
+
+        if (!item) {
+            return -1;
+        }
+
+        const timeDiff = Date.now() - item.timestamp;
+        if (timeDiff > config.security.transferLimitResetInterval) {
+            this.transferLimitMap.delete(client.ip);
+            return -1;
+        }
+
+        return config.security.transferLimitResetInterval - timeDiff;
+    }
 
     public delete(client: Client): boolean {
 
