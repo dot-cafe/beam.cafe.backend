@@ -2,7 +2,7 @@ import * as fs       from 'fs';
 import {WriteStream} from 'fs';
 import * as path     from 'path';
 import {config}      from '../config';
-import {secureUid}   from '../utils/uid';
+import {uid}         from '../utils/uid';
 import {Events}      from './events';
 
 const LOG_FILE_STREAM_OPTIONS = {flags: 'a'};
@@ -52,7 +52,7 @@ export const log = <T extends keyof Events>(
     const logMessage = `${JSON.stringify({
         level: level.toLowerCase(),
         timestamp: Date.now(),
-        eventId: secureUid(config.server.internalIdSize),
+        eventId: uid(config.server.internalIdSize),
         eventType: t,
         ...p
     })}\n`;
