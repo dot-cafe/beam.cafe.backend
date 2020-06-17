@@ -1,5 +1,4 @@
 import * as WebSocket  from 'ws';
-import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
 import {Collection}    from '../utils/db/Collection';
 import {Client}        from './Client';
@@ -21,10 +20,6 @@ export const clients = new class extends Collection<Client> {
         for (const stream of activeStreams) {
             stream.cancel();
         }
-
-        log('destroy-session', {
-            userId: client.id
-        }, LogLevel.DEBUG);
 
         return super.delete(client);
     }

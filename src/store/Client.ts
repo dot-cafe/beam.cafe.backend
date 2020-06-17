@@ -67,20 +67,28 @@ export class Client extends CollectionItem {
 
     public markDisconnected(): void {
         if (this.settings.strictSession) {
-            clients.delete(this);
+            this.destroySession();
         } else {
             this.connectionTimeout = setTimeout(
-                () => clients.delete(this),
+                () => this.destroySession(),
                 config.security.clientWebSocketSessionTimeout
             );
         }
     }
 
+    public destroySession(): void {
+        log('destroy-session', {
+            userId: this.id
+        }, LogLevel.DEBUG);
+
+        clients.delete(this);
+    }
+
     public async createSession(): Promise<boolean> {
         if (this.sessionKey === null) {
+            clearTimeout(this.socketTimeout);
             this.sessionKey = await secureUid(config.security.clientWebSocketSessionKeySize);
             this.sendMessage('new-session', this.sessionKey);
-            clearTimeout(this.socketTimeout);
 
             log('create-session', {
                 userId: this.id,

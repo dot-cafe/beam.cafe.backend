@@ -39,6 +39,9 @@ export async function handleAction(
 
                     if (ok) {
 
+                        // Clear socket-timeout
+                        clearTimeout(client.socketTimeout);
+
                         // Remove current client and use new one
                         clients.delete(client);
                         return ok;
