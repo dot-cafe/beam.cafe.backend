@@ -1,7 +1,7 @@
 import ejs          from 'ejs';
 import {Response}   from 'express';
 import prettyBytes  from 'pretty-bytes';
-import {minifyHtml} from './minify-html';
+import {minifyHTML} from './minifyHTML';
 
 export type RenderEjsPayload = {
     template: string;
@@ -35,7 +35,7 @@ export const renderEJS = (
             response.sendStatus(500);
         } else {
             response.status(status);
-            response.send(minifyHtml(str));
+            response.send(minifyHTML(str));
         }
     });
 };

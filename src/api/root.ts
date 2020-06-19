@@ -3,7 +3,7 @@ import {TEMPLATES}  from '../constants';
 import {Client}     from '../store/Client';
 import {clients}    from '../store/clients';
 import {HostedFile} from '../types';
-import {renderEJS}  from '../utils/render-ejs';
+import {renderEJS}  from '../utils/renderEJS';
 
 export default (): Router => {
     const router = Router();

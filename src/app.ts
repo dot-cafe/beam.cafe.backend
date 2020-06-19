@@ -7,7 +7,7 @@ import {config}         from './config';
 import {TEMPLATES}      from './constants';
 import {log, LogLevel}  from './logging';
 import {wrapHTTPServer} from './socket';
-import {renderEJS}      from './utils/render-ejs';
+import {renderEJS}      from './utils/renderEJS';
 
 (async (): Promise<void> => {
     const dev = process.env.NODE_ENV === 'development';

@@ -5,7 +5,7 @@ import {Stream}        from '../store/Stream';
 import {streams}       from '../store/streams';
 import {Transmission}  from '../store/Transmission';
 import {transmissions} from '../store/transmissions';
-import {renderEJS}     from '../utils/render-ejs';
+import {renderEJS}     from '../utils/renderEJS';
 
 export default (): Router => {
     const router = Router();

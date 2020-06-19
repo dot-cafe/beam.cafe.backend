@@ -4,7 +4,7 @@ import {config}            from '../config';
 import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
 import {CollectionItem}    from '../utils/db/CollectionItem';
-import {decryptUserAgent}  from '../utils/decrypt-user-agent';
+import {decryptUserAgent}  from '../utils/decryptUserAgent';
 import {serializeFilename} from '../utils/serializeFileName';
 import {secureUid}         from '../utils/uid';
 import {clients}           from './clients';
