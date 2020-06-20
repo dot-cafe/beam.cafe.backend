@@ -24,4 +24,4 @@ const minifyOptions = {
     useShortDoctype: true
 };
 
-export const minifyHTML = (html: string): string => minify(html, minifyOptions);
+export const minifyHtml = (html: string): string => minify(html, minifyOptions);

@@ -3,7 +3,7 @@ import {TEMPLATES}  from '../constants';
 import {Client}     from '../store/Client';
 import {clients}    from '../store/clients';
 import {HostedFile} from '../types';
-import {renderEJS}  from '../utils/renderEJS';
+import {renderEjs}  from '../utils/render-ejs';
 
 export default (): Router => {
     const router = Router();
@@ -28,7 +28,7 @@ export default (): Router => {
             }
         }
 
-        renderEJS({
+        renderEjs({
             template, status,
             response: res,
             data: {file, user}

@@ -2,7 +2,7 @@ import mime                                    from 'mime-types';
 import {Request, Response}                     from 'express';
 import {HostedFile}                            from '../types';
 import {CollectionItem}                        from '../utils/db/CollectionItem';
-import {ByteRangeHeader, parseByteRangeHeader} from '../utils/parseByteRangeHeader';
+import {ByteRangeHeader, parseByteRangeHeader} from '../utils/parse-byte-range-header';
 import {Client}                                from './Client';
 import {streams}                               from './streams';
 

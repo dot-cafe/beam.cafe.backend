@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 
-export const serializeFilename = (name: string): string => {
+export const serializeFileName = (name: string): string => {
 
     // Maximum length is 100
     name = name.slice(0, 100);

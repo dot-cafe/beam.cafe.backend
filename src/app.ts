@@ -7,7 +7,7 @@ import {config}         from './config';
 import {TEMPLATES}      from './constants';
 import {log, LogLevel}  from './logging';
 import {wrapHTTPServer} from './socket';
-import {renderEJS}      from './utils/renderEJS';
+import {renderEjs}      from './utils/render-ejs';
 
 (async (): Promise<void> => {
     const dev = process.env.NODE_ENV === 'development';
@@ -39,7 +39,7 @@ import {renderEJS}      from './utils/renderEJS';
     app.use(api());
 
     // 404 Fallback
-    app.use((_, res) => renderEJS({
+    app.use((_, res) => renderEjs({
         template: TEMPLATES.ERROR_404,
         response: res
     }));

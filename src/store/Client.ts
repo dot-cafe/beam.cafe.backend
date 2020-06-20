@@ -5,8 +5,8 @@ import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
 import {CollectionItem}    from '../utils/db/CollectionItem';
 import {decryptUserAgent}  from '../utils/decrypt-user-agent';
-import {resolveClientIP}   from '../utils/resolveClientIP';
-import {serializeFilename} from '../utils/serializeFileName';
+import {resolveClientIp}   from '../utils/resolve-client-ip';
+import {serializeFileName} from '../utils/serialize-file-name';
 import {secureUid}         from '../utils/uid';
 import {clients}           from './clients';
 import {transmissions}     from './transmissions';
@@ -43,7 +43,7 @@ export class Client extends CollectionItem {
         this.sessionKey = null;
         this.connectionTimeout = null;
         this.timeoutTimestamp = 0;
-        this.ip = resolveClientIP(req) as string; // I assume the socket isn't destroyed yet
+        this.ip = resolveClientIp(req) as string; // I assume the socket isn't destroyed yet
         this.settings = {...Client.DEFAULT_SETTINGS};
 
         // Client user-agent
@@ -170,7 +170,7 @@ export class Client extends CollectionItem {
 
             files.push({
                 id: await secureUid(config.security.fileKeySize),
-                serializedName: serializeFilename(name),
+                serializedName: serializeFileName(name),
                 name, size
             });
         }

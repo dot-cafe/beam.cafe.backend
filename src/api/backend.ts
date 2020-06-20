@@ -5,7 +5,7 @@ import {Stream}        from '../store/Stream';
 import {streams}       from '../store/streams';
 import {Transmission}  from '../store/Transmission';
 import {transmissions} from '../store/transmissions';
-import {renderEJS}     from '../utils/renderEJS';
+import {renderEjs}     from '../utils/render-ejs';
 
 export default (): Router => {
     const router = Router();
@@ -44,7 +44,7 @@ export default (): Router => {
 
             // Check transfer-limit
             if (clients.checkIPLimit(client, file.size)) {
-                return renderEJS({
+                return renderEjs({
                     template: TEMPLATES.DOWNLOAD_RATE_LIMITED,
                     response: res,
                     status: 403
@@ -71,7 +71,7 @@ export default (): Router => {
             }
         }
 
-        renderEJS({
+        renderEjs({
             template: TEMPLATES.DOWNLOAD_GONE,
             response: res,
             status: 410
@@ -88,7 +88,7 @@ export default (): Router => {
 
             // Check transfer-limit
             if (clients.checkIPLimit(client, file.size)) {
-                return renderEJS({
+                return renderEjs({
                     template: TEMPLATES.DOWNLOAD_RATE_LIMITED,
                     response: res,
                     status: 403
@@ -115,7 +115,7 @@ export default (): Router => {
             }
         }
 
-        renderEJS({
+        renderEjs({
             template: TEMPLATES.DOWNLOAD_GONE,
             response: res,
             status: 410
