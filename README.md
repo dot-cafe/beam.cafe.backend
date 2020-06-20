@@ -49,7 +49,9 @@ A config file consists of the following options, each option is optional and wil
         "downloadKeyMaxAge": 60000, // Maximum age of a download key until its used - the shorter the better
         "clientWebSocketTimeout": 15000, // Timout for a websocket without a session - the shorter the better
         "clientWebSocketSessionTimeout": 900000, // Timeout for web-socket connections
-        "clientWebSocketSessionKeySize": 64 // Size of a session-key - the longer the better
+        "clientWebSocketSessionKeySize": 64, // Size of a session-key - the longer the better
+        "transferLimit": 50000000000, // Transferlimit for the uploader (ip-based) - used to prevent abuse (50GB)
+        "transferLimitResetInterval": 86400000 // Expiration date for the transfer-limit (1d)
     },
     "logs": {
         "logUserAgent": true, // If the user-agent of each client should be logged

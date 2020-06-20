@@ -1,0 +1,25 @@
+@import '../styles/base';
+@import '../styles/animations';
+@import '../styles/components';
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+main {
+    background: var(--c-red);
+    text-align: center;
+    line-height: 1.75em;
+
+    p {
+        color: var(--c-text-secondary);
+    }
+
+    > svg {
+        @include size(3em);
+        margin: 0.5em auto 1em;
+        fill: white;
+    }
+}

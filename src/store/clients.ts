@@ -1,11 +1,77 @@
 import * as WebSocket  from 'ws';
+import {config}        from '../config';
+import {log, LogLevel} from '../logging';
 import {HostedFile}    from '../types';
 import {Collection}    from '../utils/db/Collection';
 import {Client}        from './Client';
 import {streams}       from './streams';
 import {transmissions} from './transmissions';
 
+type TransferLimitEntry = {
+    locked: boolean;
+    amount: number;
+    timestamp: number;
+}
+
 export const clients = new class extends Collection<Client> {
+    private readonly transferLimitMap: Map<string, TransferLimitEntry> = new Map();
+
+    public updateIPLimit(client: Client, amount: number): boolean {
+        let item = this.transferLimitMap.get(client.ip);
+
+        if (!item) {
+            item = {
+                amount,
+                locked: false,
+                timestamp: Date.now()
+            } as TransferLimitEntry;
+
+            this.transferLimitMap.set(client.ip, item);
+
+            // Prevent memory leaks by removing it after a fixed time
+            setTimeout(() => {
+                this.transferLimitMap.delete(client.ip);
+            }, config.security.transferLimitResetInterval);
+        } else {
+            item.amount += amount;
+        }
+
+        return this.checkIPLimit(client);
+    }
+
+    public checkIPLimit(client: Client, additional = 0): boolean {
+        const item = this.transferLimitMap.get(client.ip);
+
+        if (item) {
+            if (item.locked) {
+                return true;
+            } else if (item.amount > config.security.transferLimit) {
+                item.locked = true;
+
+                log('transfer-limit-locked', {
+                    ip: client.ip,
+                    userId: client.id,
+                    bytesTransferred: item.amount
+                }, LogLevel.DEBUG);
+
+                return true;
+            } else if ((item.amount + additional) > config.security.transferLimit) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public remainingTimeForIPLimit(client: Client): number {
+        const item = this.transferLimitMap.get(client.ip);
+
+        if (!item) {
+            return -1;
+        }
+
+        return config.security.transferLimitResetInterval - (Date.now() - item.timestamp);
+    }
 
     public delete(client: Client): boolean {
 

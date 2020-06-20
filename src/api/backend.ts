@@ -40,6 +40,16 @@ export default (): Router => {
 
         // Validate provider
         if (resolved) {
+            const [client, file] = resolved;
+
+            // Check transfer-limit
+            if (clients.checkIPLimit(client, file.size)) {
+                return renderEJS({
+                    template: TEMPLATES.DOWNLOAD_RATE_LIMITED,
+                    response: res,
+                    status: 403
+                });
+            }
 
             // Check if download-hash is present
             if (hash) {
@@ -48,7 +58,6 @@ export default (): Router => {
                 if (transmissions.removeTransmissionKey(hash)) {
 
                     // Start download
-                    const [client, file] = resolved;
                     new Transmission(req, res, client, file);
                     return;
                 }
@@ -75,6 +84,16 @@ export default (): Router => {
 
         // Validate provider and check if streams are allowed by this user
         if (resolved && resolved[0].settings.allowStreaming) {
+            const [client, file] = resolved;
+
+            // Check transfer-limit
+            if (clients.checkIPLimit(client, file.size)) {
+                return renderEJS({
+                    template: TEMPLATES.DOWNLOAD_RATE_LIMITED,
+                    response: res,
+                    status: 403
+                });
+            }
 
             // Check if download-hash is present
             if (hash) {
@@ -83,7 +102,6 @@ export default (): Router => {
                 if (streams.checkStreamKey(hash)) {
 
                     // Start stream
-                    const [client, file] = resolved;
                     new Stream(req, res, client, file, hash);
                     return;
                 }

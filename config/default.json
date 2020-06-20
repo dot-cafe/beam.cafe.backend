@@ -11,7 +11,9 @@
         "downloadKeyMaxAge": 60000,
         "clientWebSocketTimeout": 15000,
         "clientWebSocketSessionTimeout": 900000,
-        "clientWebSocketSessionKeySize": 64
+        "clientWebSocketSessionKeySize": 64,
+        "transferLimit": 50000000000,
+        "transferLimitResetInterval": 86400000
     },
     "logs": {
         "logUserAgent": true,

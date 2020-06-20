@@ -2,6 +2,7 @@ import {Request, Response} from 'express';
 import {HostedFile}        from '../types';
 import {CollectionItem}    from '../utils/db/CollectionItem';
 import {Client}            from './Client';
+import {clients}           from './clients';
 import {transmissions}     from './transmissions';
 
 /**
@@ -90,8 +91,16 @@ export class Transmission extends CollectionItem {
         this.uploaderResponse = uploaderResponse;
 
         uploaderRequest.on('data', chunk => {
-            downloaderResponse.write(chunk);
-            this.bytesTransferred += chunk.length;
+            if (clients.updateIPLimit(this.provider, chunk.length)) {
+                uploaderRequest.destroy();
+
+                // Triggers the close event
+                downloaderResponse.destroy();
+                this.provider.sendRateLimitInfo();
+            } else {
+                downloaderResponse.write(chunk);
+                this.bytesTransferred += chunk.length;
+            }
         });
 
         uploaderRequest.on('error', () => {

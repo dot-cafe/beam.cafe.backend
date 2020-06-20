@@ -10,5 +10,6 @@ export const TEMPLATES = {
     DOWNLOAD: path.join(TEMPLATE_DIR, 'download.ejs'),
     DOWNLOAD_OFFLINE: path.join(TEMPLATE_DIR, 'download-offline.ejs'),
     DOWNLOAD_NOT_FOUND: path.join(TEMPLATE_DIR, 'download-notfound.ejs'),
-    DOWNLOAD_GONE: path.join(TEMPLATE_DIR, 'download-gone.ejs')
+    DOWNLOAD_GONE: path.join(TEMPLATE_DIR, 'download-gone.ejs'),
+    DOWNLOAD_RATE_LIMITED: path.join(TEMPLATE_DIR, 'download-rate-limited.ejs')
 };
