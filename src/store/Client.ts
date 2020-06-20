@@ -1,5 +1,5 @@
-import {Request}           from 'express';
 import * as WebSocket      from 'ws';
+import * as http           from 'http';
 import {config}            from '../config';
 import {log, LogLevel}     from '../logging';
 import {HostedFile}        from '../types';
@@ -36,7 +36,7 @@ export class Client extends CollectionItem {
     private connectionTimeout: NodeJS.Timeout | null;
     private timeoutTimestamp = 0;
 
-    constructor(socket: WebSocket, req: Request) {
+    constructor(socket: WebSocket, req: http.IncomingMessage) {
         super();
         this.files = [];
         this.socket = socket;
