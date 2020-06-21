@@ -10,7 +10,7 @@
         "build": "run-p build:ts build:templates",
         "build:ts": "tsc --project tsconfig.json",
         "build:templates": "node scripts/build.templates.js",
-        "start": "tsc && node dist/app.js",
+        "start": "tsc && node dist/src/app.js",
         "dev": "run-p dev:ts dev:templates",
         "dev:ts": "ts-node-dev --respawn --transpileOnly src/app.ts",
         "dev:templates": "node scripts/watch.templates.js",
