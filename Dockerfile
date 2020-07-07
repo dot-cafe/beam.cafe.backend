@@ -14,7 +14,7 @@ RUN npm install
 RUN npm run build
 
 ###backend
-FROM alpine:current-alpine
+FROM node:current-alpine
 
 WORKDIR /backend
 
