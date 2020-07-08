@@ -1,30 +1,48 @@
-FROM node:alpine3.11 as build-stage
+FROM node:11
 MAINTAINER Simon Reinisch <contact@reinisch.io>
-
-# Create app directory
-WORKDIR /backend
-
-# Copy the important file
+# Use app as working directory
+WORKDIR /app
+# Copy repository content
 COPY . .
-
-# Install app dependencies
-RUN npm install
-
-# Build the application for deployment
-RUN npm run build
-
-###backend
-FROM node:current-alpine
-
-WORKDIR /backend
-
-COPY --from=build-stage /backend/dist /backend
-
-# install dependency
-RUN npm install --production
-
+# Update and upgrade system
+RUN apt-get update && \
+    apt-get upgrade -y
+# Install pm2 as process manager, it'll restart the app in case of emergencies
+RUN npm install pm2 -g
+# Install and build backend
+RUN npm install && \
+    npm run build
 # Open port 8080
 EXPOSE 8080
+# Use pm2 as entrypoint
+ENTRYPOINT ["pm2", "start", "dist/src/app.js", "--name", "beam.cafe.backend", "--no-daemon"]
 
-# Command to start the server
-CMD RUN npm run start
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
