@@ -17,7 +17,10 @@ export async function handleAction(
     data: unknown,
     ws: WebSocket
 ): Promise<Client> {
-    const {error, value} = validation.ClientAction.validate(data);
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const {error, value} = validation.ClientAction.validate<any>(data);
+
     if (error) {
         log('validation-error', {error}, LogLevel.WARNING);
         return client;
