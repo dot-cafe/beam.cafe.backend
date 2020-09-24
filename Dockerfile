@@ -6,11 +6,13 @@ WORKDIR /app
 # Copy repository content
 COPY . .
 
+# Install dependencies
+RUN npm install
+
 # Open port 8080
 EXPOSE 8080
 
 # Install and start
 ENTRYPOINT cp /config/backend.json config/production.json && \
-           npm install && \
            npm run build && \
            node dist/src/app.js
