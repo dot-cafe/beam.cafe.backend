@@ -10,7 +10,7 @@ COPY . .
 EXPOSE 8080
 
 # Install and start
-ENTRYPOINT cp /config/backend.json config/production.json
+ENTRYPOINT cp /config/backend.json config/production.json && \
            npm install && \
            npm run build && \
            node dist/src/app.js

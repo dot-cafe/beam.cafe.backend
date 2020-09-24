@@ -18,9 +18,7 @@
         "logLevels": [
             "FATAL",
             "ERROR",
-            "WARNING",
-            "INFO",
-            "DEBUG"
+            "WARNING"
         ]
     }
 }
