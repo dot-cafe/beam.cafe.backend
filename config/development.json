@@ -1,5 +1,14 @@
 {
     "server": {
         "internalIdSize": 8
+    },
+    "logs": {
+        "logLevels": [
+            "FATAL",
+            "ERROR",
+            "WARNING",
+            "INFO",
+            "DEBUG"
+        ]
     }
 }
