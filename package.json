@@ -17,12 +17,14 @@
         "lint:ts": "eslint src/**/*.{js,ts,tsx} html/**/*.{js,ts,tsx}",
         "lint:ts:fix": "eslint src/**/*.{js,ts,tsx} html/**/*.{js,ts,tsx} --fix",
         "lint:types": "tsc --project tsconfig.json --noEmit",
-        "lint:fix": "npm run lint:ts:fix && npm run lint:types"
+        "lint:fix": "npm run lint:ts:fix && npm run lint:types",
+        "docker:push": "docker build . -t dotcafe/beam.cafe.backend && docker push dotcafe/beam.cafe.backend"
     },
     "devDependencies": {
         "@types/cors": "^2.8.7",
         "@types/express": "^4.17.8",
         "@types/joi": "^14.3.4",
+        "@types/node": "^14.14.9",
         "@types/ws": "^7.2.6",
         "@typescript-eslint/eslint-plugin": "^4.2.0",
         "@typescript-eslint/parser": "^4.2.0",

@@ -11,7 +11,7 @@ export function handleRequest(
 ): void {
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const {error, value} = validation.ClientRequest.validate<any>(request);
+    const {error, value} = validation.ClientRequest.validate(request);
 
     if (error) {
         log('validation-error', {error}, LogLevel.WARNING);

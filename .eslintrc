@@ -21,6 +21,7 @@
     "rules": {
         "no-multi-spaces": ["error", {"exceptions": {"ImportDeclaration": true}}],
         "align-import/align-import": "error",
-        "new-cap": "off"
+        "new-cap": "off",
+        "no-undef": "off"
     }
 }

@@ -19,7 +19,7 @@ export async function handleAction(
 ): Promise<Client> {
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    const {error, value} = validation.ClientAction.validate<any>(data);
+    const {error, value} = validation.ClientAction.validate(data);
 
     if (error) {
         log('validation-error', {error}, LogLevel.WARNING);
